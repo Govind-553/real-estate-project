@@ -35,7 +35,7 @@
     </nav>
 
     <!-- Advanced Search Section -->
-    <section class="search-section">
+    <section class="search-section" id="home">
         <div class="search-container">
             <h2 class="search-title">Find Your Perfect Property</h2>
             
@@ -112,7 +112,6 @@
         </div>
     </section>
 
-
     <!-- Property Listings Tables Section --> 
     <section class="listings-section">
         <div class="property-container">
@@ -120,30 +119,30 @@
             <table class="property-table" id="ownerPropertiesTable">
                 <thead>
                     <tr>
-                        <th>Property ID</th>
                         <th>Location</th>
-                        <th>Type</th>
+                        <th>Property Type</th>
                         <th>Price</th>
                         <th>Owner Name</th>
                         <th>Contact</th>
+                        <th>Date</th>
                     </tr>
                 </thead>
                 <tbody id="ownerPropertiesBody">
                      <tr>
-                    <td>101</td>
                     <td>New York, NY</td>
-                    <td>Apartment</td>
+                    <td>2 RK</td>
                     <td>$3,000</td>
                     <td>John Doe</td>
                     <td>(123) 456-7890</td>
+                    <td>2025-01-01</td>
                 </tr>
                 <tr>
-                    <td>102</td>
                     <td>Los Angeles, CA</td>
-                    <td>House</td>
+                    <td>1 BHK</td>
                     <td>$4,500</td>
                     <td>Jane Smith</td>
                     <td>(987) 654-3210</td>
+                    <td>2025-06-01</td>
                 </tr>
                 </tbody>
             </table>
@@ -154,36 +153,167 @@
             <table class="property-table" id="renterPropertiesTable">
                 <thead>
                     <tr>
-                        <th>Property ID</th>
                         <th>Location</th>
-                        <th>Type</th>
+                        <th>Property Type</th>
                         <th>Price</th>
-                        <th>Renter Name</th>
+                        <th>Agent Name</th>
                         <th>Contact</th>
+                        <th>Date</th>
                     </tr>
                 </thead>
                 <tbody id="renterPropertiesBody">
                 <tr>
-                    <td>201</td>
                     <td>Chicago, IL</td>
-                    <td>Condo</td>
+                    <td>1 RK</td>
                     <td>$2,500</td>
                     <td>Emily Johnson</td>
                     <td>(555) 123-4567</td>
+                    <td>2025-03-15</td>
                 </tr>
                 <tr>
-                    <td>202</td>
                     <td>Miami, FL</td>
-                    <td>Studio</td>
+                    <td>2 BHK</td>
                     <td>$1,800</td>
                     <td>Michael Brown</td>
                     <td>(444) 765-4321</td>
+                    <td>2025-09-01</td>
                 </tr>
                 </tbody>
             </table>
         </div>
     </section>
     
+     <!-- About Section -->
+    <section class="about-section" id="about">
+        <div class="section-container">
+            <h2 class="section-title">About Us</h2>
+            <div class="two-column-layout">
+                <div class="column">
+                    <h3>Our Story</h3>
+                    <p>For over 15 years, we've been helping families find their dream homes and investors discover profitable opportunities. Our team combines deep local market knowledge with cutting-edge technology to deliver exceptional results.</p>
+                    <p>We understand that buying or selling a property is one of life's most significant decisions. That's why we're committed to providing personalized service, honest advice, and unwavering support throughout your real estate journey.</p>
+                    
+                    <div class="about-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">500+</span>
+                            <div class="stat-label">Properties Sold</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">15+</span>
+                            <div class="stat-label">Years Experience</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">95%</span>
+                            <div class="stat-label">Client Satisfaction</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">24/7</span>
+                            <div class="stat-label">Support Available</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="column">
+                    <h3>Meet Our Team</h3>
+                    <div class="team-member">
+                        <div class="member-photo">JS</div>
+                        <div class="member-name">John Smith</div>
+                        <div class="member-title">Senior Real Estate Agent</div>
+                    </div>
+                    
+                    <div class="team-member">
+                        <div class="member-photo">MJ</div>
+                        <div class="member-name">Maria Johnson</div>
+                        <div class="member-title">Property Consultant</div>
+                    </div>
+                    
+                    <p>Our experienced team brings together decades of combined expertise in residential and commercial real estate. We stay up-to-date with market trends and use the latest tools to ensure you get the best possible outcome.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact-section" id="contact">
+        <div class="section-container">
+            <h2 class="section-title">Contact Us</h2>
+            <div class="two-column-layout">
+                <div class="column">
+                    <h3>Get In Touch</h3>
+                    <p>Ready to start your real estate journey? We're here to help. Contact us today to schedule a consultation or get answers to your questions.</p>
+                    
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <div class="contact-icon">📍</div>
+                            <div class="contact-details">
+                                <div class="contact-label">Address</div>
+                                <div class="contact-value">123 Main Street, Suite 100<br>Mumbai, Maharashtra 400001</div>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <div class="contact-icon">📞</div>
+                            <div class="contact-details">
+                                <div class="contact-label">Phone</div>
+                                <div class="contact-value">+91 98765 43210</div>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <div class="contact-icon">✉️</div>
+                            <div class="contact-details">
+                                <div class="contact-label">Email</div>
+                                <div class="contact-value">info@realestate.com</div>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <div class="contact-icon">🕒</div>
+                            <div class="contact-details">
+                                <div class="contact-label">Business Hours</div>
+                                <div class="contact-value">Mon - Sat: 9:00 AM - 7:00 PM<br>Sunday: 10:00 AM - 5:00 PM</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="column">
+                    <div class="contact-form">
+                        <h3>Send us a Message</h3>
+                        <form>
+                            <div class="form-group">
+                                <label for="name">Full Name *</label>
+                                <input type="text" id="name" name="name" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="email">Email Address *</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="phone">Phone Number</label>
+                                <input type="tel" id="phone" name="phone">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="subject">Subject</label>
+                                <input type="text" id="subject" name="subject" placeholder="I'm interested in...">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="message">Message *</label>
+                                <textarea id="message" name="message" placeholder="Tell us about your real estate needs..." required></textarea>
+                            </div>
+                            
+                            <button type="submit" class="submit-btn">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer Component -->
     <footer class="footer">
         <div class="footer-container">
