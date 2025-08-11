@@ -1067,10 +1067,12 @@
                 </div>
 
                 <!-- Search Button -->
-                <button class="search-btn" onclick="applyFilters()">
+                <button type="button" class="search-btn" onclick="applyFilters()">
                     <i class="fas fa-search"></i>
                     Search
                 </button>
+
+            <!-- <button type="button" id="clearAllFilters">Clear All</button> -->
             </div>
 
             <!-- Selected Filters Display -->
@@ -1260,6 +1262,9 @@
 
 
     <script>
+
+        let filters = {}; //globally accessible
+
         // Hamburger menu functionality
         document.addEventListener('DOMContentLoaded', function() {
             const hamburger = document.querySelector('.hamburger');
@@ -1375,8 +1380,83 @@
                 
                 console.log('Search Data:', searchData);
                 alert('Search functionality will be implemented here!\nCheck console for search data.');
-            });
+            }); 
+
+    // ===== Attach Clear All button if exists =====
+    const clearBtn = document.getElementById('clearAllFilters');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', clearAllFilters);
+    }
         });
+        
+
+//  CLEAR ALL FUNCTION
+function clearAllFilters() {
+    // Reset object
+    filters = {};
+
+    // Reset dropdown UIs
+    document.querySelectorAll('.dropdown').forEach(dropdown => {
+        dropdown.querySelector('.dropdown-btn span').textContent = 'All';
+        dropdown.querySelectorAll('.dropdown-option').forEach(opt => opt.classList.remove('selected'));
+    });
+
+    // Reset text input
+    document.getElementById('location').value = '';
+
+    // Update tag display
+    document.getElementById('selectedFilters').innerHTML = '';
+
+    // Show all rows again
+    applyFilters();
+}
+
+
+//  FILTERING LOGIC
+function applyFilters() {
+    const locationInput = document.getElementById('location').value.trim().toLowerCase();
+
+    const flatTypeValue = filters.flatType ? filters.flatType.value : 'all';
+    const priceRangeValue = filters.priceRange ? filters.priceRange.value : 'all';
+    const tenantTypeValue = filters.tenantType ? filters.tenantType.value : 'all';
+
+    // Helper: check price range
+    function priceMatches(price, range) {
+        if (range === 'all') return true;
+        if (range.includes('+')) {
+            let min = parseInt(range.replace('+', ''), 10);
+            return price >= min;
+        }
+        let [min, max] = range.split('-').map(Number);
+        return price >= min && price <= max;
+    }
+
+    // Apply to both tables
+    function filterTable(tableBodyId) {
+        const rows = document.getElementById(tableBodyId).querySelectorAll('tr');
+        rows.forEach(row => {
+            const rowLocation = row.getAttribute('data-location').toLowerCase();
+            const rowType = row.getAttribute('data-type').toLowerCase();
+            const rowPrice = parseInt(row.getAttribute('data-price'), 10);
+            const rowTenant = row.getAttribute('data-tenant')?.toLowerCase() || '';
+
+            const matchLocation = locationInput === '' || rowLocation.includes(locationInput);
+            const matchType = flatTypeValue === 'all' || flatTypeValue === rowType;
+            const matchPrice = priceMatches(rowPrice, priceRangeValue);
+            const matchTenant = tenantTypeValue === 'all' || tenantTypeValue === rowTenant;
+
+            if (matchLocation && matchType && matchPrice && matchTenant) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    filterTable('ownerPropertiesBody');
+    filterTable('renterPropertiesBody');
+}
+
     </script>
 </body>
 </html>
