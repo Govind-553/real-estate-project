@@ -660,6 +660,88 @@
                 height: 35px;
             }
         }
+
+        /* Side Panel Styles */
+.side-panel {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  background: #fff;
+  overflow-x: hidden;
+  transition: 0.4s;
+  box-shadow: -2px 0 8px rgba(0,0,0,0.2);
+  z-index: 2000;
+  padding: 0;
+}
+.panel-header {
+  padding: 15px;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  color: #fff;
+  font-size: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 26px;
+  cursor: pointer;
+}
+.panel-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+.panel-content label {
+  margin: 8px 0 4px;
+  font-weight: 500;
+  color: #555;
+}
+.panel-content input {
+  padding: 8px;
+  font-size: 15px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-bottom: 12px;
+}
+.button-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+.button-row button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+}
+#editBtn {
+  background-color: #ffc107;
+  color: #fff;
+}
+#saveBtn {
+  background-color: #28a745;
+  color: #fff;
+}
+#saveBtn:disabled {
+  background-color: #7bd598;
+  cursor: not-allowed;
+}
+
+/* Overlay for background dim */
+.overlay {
+  position: fixed;
+  display: none;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4);
+  z-index: 1500;
+}
     </style>
 </head>
 <body>
@@ -670,9 +752,35 @@
         </div>
         
         <ul class="nav-links">
-            <li><a href="../frontend/home.html" style="font-size: 1.5rem;">Home</a></li>
-            <li><a href="../frontend/profile.html"><i class ="fa fa-user" style ="font-size: 1.5rem;"></i></a></li>
+            <li><a href="../frontend/home.html">Home</a></li>
+            <a href="javascript:void(0)" id="profileIcon"><i class="fa fa-user"></i></a>
         </ul>
+
+        <!-- Right Side Profile Panel -->
+<div id="profilePanel" class="side-panel">
+  <div class="panel-header">
+    <span>My Profile</span>
+    <button class="close-btn" id="closeProfile">&times;</button>
+  </div>
+  <div class="panel-content">
+    <label for="profileName">Name:</label>
+    <input type="text" id="profileName" value="John Doe" disabled>
+
+    <label for="profileMobile">Mobile Number:</label>
+    <input type="text" id="profileMobile" value="+91 9876543210" disabled>
+
+    <label for="profilePassword">Password:</label>
+    <input type="password" id="profilePassword" value="********" disabled>
+
+    <div class="button-row">
+      <button id="editBtn">Edit</button>
+      <button id="saveBtn" disabled>Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay (click to close) -->
+<div id="overlay" class="overlay"></div>
         
         <div class="hamburger">
             <span></span>
@@ -922,6 +1030,46 @@
             hamburger.addEventListener('click', function() {
                 navLinks.classList.toggle('active');
             });
+
+            const profilePanel = document.getElementById('profilePanel');
+const profileIcon = document.getElementById('profileIcon');
+const closeBtn = document.getElementById('closeProfile');
+const overlay = document.getElementById('overlay');
+
+const editBtn = document.getElementById('editBtn');
+const saveBtn = document.getElementById('saveBtn');
+const fields = [
+  document.getElementById('profileName'),
+  document.getElementById('profileMobile'),
+  document.getElementById('profilePassword')
+];
+
+// Open panel on icon click
+profileIcon.addEventListener('click', () => {
+  profilePanel.style.width = '320px';
+  overlay.style.display = 'block';
+});
+
+// Close panel
+closeBtn.addEventListener('click', closePanel);
+overlay.addEventListener('click', closePanel);
+function closePanel() {
+  profilePanel.style.width = '0';
+  overlay.style.display = 'none';
+}
+
+// Edit button enables fields
+editBtn.addEventListener('click', () => {
+  fields.forEach(f => f.disabled = false);
+  saveBtn.disabled = false;
+});
+
+// Save button disables fields
+saveBtn.addEventListener('click', () => {
+  fields.forEach(f => f.disabled = true);
+  saveBtn.disabled = true;
+  alert('Profile updated successfully (frontend simulation)');
+});
 
             // Dropdown functionality
             const dropdowns = document.querySelectorAll('.dropdown');
