@@ -1,11 +1,7 @@
-import express from "express";
 import RentFlat from "../models/rentflats.js";
 import User from "../models/User.js";
 
-const router = express.Router();
-
-
-// Route 1 - Create a new rent listing
+//  Create a new rent listing
 export const createRentListing = async (req, res) => {
     const { contact } = req.params;
     let rentData = req.body;
@@ -40,24 +36,14 @@ export const createRentListing = async (req, res) => {
             listing: savedListing,
         });
 
-        } catch (error) {
-        console.error("Error creating rent listing:");
-        console.error("Message:", error.message);
-        console.error("Stack:", error.stack);
-        if (error.errors) {
-        console.error("Validation Errors:", error.errors);
-        }
-        if (error.code) {
-        console.error("MongoDB Error Code:", error.code);
-     }
-
-    res.status(500).json({ message: "Server error while creating rent listing." });
-}  
+    } catch (error) {
+        console.error("Error creating rent listing:", error.message);
+        res.status(500).json({ message: "Server error while creating rent listing." });
+    }
 };
 
-
-// Route 2 - Get all rent listings
-router.get("/all", async (req, res) => {
+//  Get all rent listings
+export const getAllRentListings = async (req, res) => {
     try {
         const listings = await RentFlat.find();
         res.status(200).json({
@@ -68,64 +54,73 @@ router.get("/all", async (req, res) => {
         console.error("Error fetching listings:", error.message);
         res.status(500).json({ message: "Server error while fetching listings." });
     }
-});
+};
 
-
-// Route 3 - Get specific rent listings by contact
-router.get("/by-contact/:contact", async (req, res) => {
+//  Get listings by contact
+export const getRentListingsByContact = async (req, res) => {
     const { contact } = req.params;
-
     try {
         const listings = await RentFlat.find({ contact });
-
         res.status(200).json({
             message: "All the flats of the specific agent are listed below.",
             listings
         });
-
     } catch (error) {
         console.error("Error fetching listings by contact:", error.message);
         res.status(500).json({ message: "Server error while fetching listings." });
     }
-});
+};
 
+// Update listings by contact
+export const updateRentListingByContact = async (req, res) => {
+    const { contact } = req.params;
+    const { location, price } = req.body;
 
-// // Route 4 - Update listings by contact (update location and price)
-// router.put("/update/:contact", async (req, res) => {
-//     const { contact } = req.params;
-//     const { location, price } = req.body;
+    try {
+        if (!contact) {
+            return res.status(400).json({ message: "Contact is required." });
+        }
 
-//     try {
-//         const update = {};
-//         if (location) update.location = location;
-//         if (price) update.price = price;
+        const update = {};
+        if (location) update.location = location;
+        if (price) update.price = price;
 
-//         const result = await RentFlat.updateMany(
-//             { contact },
-//             { $set: update }
-//         );
+        if (Object.keys(update).length === 0) {
+            return res.status(400).json({ message: "No fields provided to update." });
+        }
 
-//         if (result.modifiedCount > 0) {
-//             res.status(200).json({ message: "Listings updated successfully." });
-//         } else {
-//             res.status(404).json({ message: "No listings found for the given contact." });
-//         }
-//     } catch (error) {
-//         console.error("Error updating listings:", error.message);
-//         res.status(500).json({ message: "Server error while updating listings." });
-//     }
-// });
+        const result = await RentFlat.updateMany({ contact }, { $set: update });
 
+        if (result.modifiedCount > 0) {
+            res.status(200).json({
+                message: `Listings updated successfully for contact ${contact}.`,
+                updatedFields: update,
+                modifiedCount: result.modifiedCount
+            });
+        } else {
+            res.status(404).json({ message: "No listings found for the given contact." });
+        }
+    } catch (error) {
+        console.error("Error updating listings:", error.message);
+        res.status(500).json({ message: "Server error while updating listings." });
+    }
+};
 
-// Route 5 - Delete listings by contact
-router.delete("/delete/:contact", async (req, res) => {
+// Delete listings by contact
+export const deleteRentListingByContact = async (req, res) => {
     const { contact } = req.params;
 
     try {
+        if (!contact) {
+            return res.status(400).json({ message: "Contact is required." });
+        }
+
         const result = await RentFlat.deleteMany({ contact });
 
         if (result.deletedCount > 0) {
-            res.status(200).json({ message: "Listings deleted successfully." });
+            res.status(200).json({
+                message: `Deleted ${result.deletedCount} listing(s) for contact ${contact}.`
+            });
         } else {
             res.status(404).json({ message: "No listings found for the given contact." });
         }
@@ -133,6 +128,4 @@ router.delete("/delete/:contact", async (req, res) => {
         console.error("Error deleting listings:", error.message);
         res.status(500).json({ message: "Server error while deleting listings." });
     }
-});
-
-export default router;
+};
