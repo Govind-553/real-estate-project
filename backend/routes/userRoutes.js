@@ -1,16 +1,36 @@
 // Import required packages
 import express from "express";
 const router = express.Router(); 
-import createUser from "../controllers/userController.js";
+import {registerUser, forgotPassword, loginUser, }  from "../controllers/userController.js";
 
 // Import the User model
 import User from "../models/User.js";
 
-// Route 1 - Create new user
-router.post('/create', createUser);
+// Route 1 - register new user
+router.post('/create', registerUser);
 
-// Route 2 - Get all users
-/*
+//Route 2 - Login existing User
+router.post("/login",loginUser);
+
+//Route 3 - Forgot password
+router.post("/forgot", forgotPassword);
+
+//Route 4 - Resend OTP
+router.post("/resend-otp", (req, res) => {
+    const { mobileNumber } = req.body;
+    // Logic to generate and send OTP
+});
+
+//Route 5 - Verify OTP
+router.post("/verify-otp", (req, res) => {
+    const { mobileNumber, otp } = req.body;
+    // Logic to verify OTP
+});
+
+//Route 7 - Generate the new access token using refressToken.
+
+
+// Route 6 - Get all users
 router.get('/all', async (req, res) => {
     try {
         const users = await User.find();
@@ -19,9 +39,9 @@ router.get('/all', async (req, res) => {
         console.error(err.message);
         res.status(500).send('Server Error');
     }
-}); */
+});
 
-// Route 3 - Get user by contact
+// Route 7 - Get user by contact
 router.get('/contact/:mobileNumber', async (req, res) => {
     const { mobileNumber } = req.params;
     try {
@@ -34,6 +54,18 @@ router.get('/contact/:mobileNumber', async (req, res) => {
         console.error(err.message);
         res.status(500).send('Server Error');
     }
+});
+
+//Route 8 - Logout user.
+router.post("/logout", (req, res) => {
+    // Clear the user's session or token
+    req.session.destroy((err) => {
+        if (err) {
+            console.error(err.message);
+            return res.status(500).send('Server Error');
+        }
+        res.json({ message: "User logged out successfully." });
+    });
 });
 
 export default router;
