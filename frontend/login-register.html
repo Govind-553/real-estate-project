@@ -159,8 +159,8 @@
         <label for="password">Password</label>
         <input type="password" id="password" name="password" placeholder="Enter your password" required>
 
-        <!-- OTP Field horizontal -->
-       <div id="otp-box">
+<!-- OTP Field horizontal -->
+<div id="otp-box">
     <div class="otp-label">Enter OTP</div>
     <div class="otp-row">
         <input type="text" maxlength="1" class="otp-input" inputmode="numeric" />
@@ -187,7 +187,7 @@
 
     function showOtpUI() {
         document.getElementById("otp-box").style.display = "block";
-        document.getElementById("loginBtn").style.display = "none";
+        document.getElementById("registerBtn").style.display = "none";
         otpInputs = document.querySelectorAll(".otp-input");
         verifyBtn = document.getElementById("verifyOtpBtn");
         document.getElementById("otpMsg").textContent = "";
@@ -228,7 +228,7 @@
         verifyBtn.disabled = !allFilled;
     }
 
-    document.getElementById("loginForm").addEventListener("submit", function(e) {
+    document.getElementById("registerForm").addEventListener("submit", function(e) {
         e.preventDefault();
         if (!otpStep) {
             otpStep = true;
@@ -252,7 +252,22 @@
                 <label for="regPassword">Password</label>
                 <input type="password" id="regPassword" name="password" placeholder="Enter your password" required>
 
-                <button type="submit">Register</button>
+<!-- OTP Field horizontal -->
+<div id="otp-box">
+    <div class="otp-label">Enter OTP</div>
+    <div class="otp-row">
+        <input type="text" maxlength="1" class="otp-input" inputmode="numeric" />
+        <input type="text" maxlength="1" class="otp-input" inputmode="numeric" />
+        <input type="text" maxlength="1" class="otp-input" inputmode="numeric" />
+        <input type="text" maxlength="1" class="otp-input" inputmode="numeric" />
+        <input type="text" maxlength="1" class="otp-input" inputmode="numeric" />
+        <input type="text" maxlength="1" class="otp-input" inputmode="numeric" />
+    </div>
+    <button type="submit" id="verifyOtpBtn" disabled style="margin-top:24px;">Verify OTP</button>
+    <div class="otp-message" id="otpMsg"></div>
+</div>
+
+               <button type="submit" id="registerBtn">Register</button>
             </form>
             <p>Already have an account? <a href="#" onclick="location.reload()">Login here</a></p>
         `;
