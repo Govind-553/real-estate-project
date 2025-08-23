@@ -3,16 +3,15 @@ import jwt from "jsonwebtoken";
 export const verifyAccessToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader?.startsWith("Bearer ")) {
+  if (!authHeader?.startsWith("Bearer")) {
     return res.status(401).json({
       status: "failed",
       message: "Unauthorized User - No Token!",
     });
   }
 
-  const token = authHeader.split(" ")[1];
-
   try {
+    const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET);
 
     if (!decoded) {
@@ -23,7 +22,10 @@ export const verifyAccessToken = (req, res, next) => {
     }
 
     req.userId = decoded.userId;
-    req.mobileNumber = decoded.mobileNumber; // works only if included in token payload
+    req.mobileNumber = decoded.mobileNumber;
+    //req.contact = decoded.contact; // works only if included in token payload
+    jwt.sign({ userId: req.userId, mobileNumber: req.mobileNumber }, process.env.JWT_ACCESS_TOKEN_SECRET);
+
 
     next();
   } catch (error) {

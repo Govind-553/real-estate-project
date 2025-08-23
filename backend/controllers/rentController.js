@@ -1,9 +1,12 @@
 import RentFlat from "../models/rentflats.js";
 import User from "../models/User.js";
 
-//  Create a new rent listing
+// Route 1 Create a new rent listing
 export const createRentListing = async (req, res) => {
-    const { contact } = req.params;
+    const userId = req.userId; // Assuming userId is set by authentication middleware
+    const contact = req.mobileNumber;
+
+
     let rentData = req.body;
     rentData = { ...rentData, createdAt: new Date() };
 
@@ -42,8 +45,11 @@ export const createRentListing = async (req, res) => {
     }
 };
 
-//  Get all rent listings
+// Route 2 Get all rent listings
 export const getAllRentListings = async (req, res) => {
+     const userId = req.userId; // Assuming userId is set by authentication middleware
+    const contact = req.mobileNumber;
+
     try {
         const listings = await RentFlat.find();
         res.status(200).json({
@@ -56,9 +62,11 @@ export const getAllRentListings = async (req, res) => {
     }
 };
 
-//  Get listings by contact
+//  Route 3 Get listings by contact
 export const getRentListingsByContact = async (req, res) => {
-    const { contact } = req.params;
+    const userId = req.userId; // Assuming userId is set by authentication middleware
+    const contact = req.mobileNumber;
+
     try {
         const listings = await RentFlat.find({ contact });
         res.status(200).json({
@@ -71,9 +79,11 @@ export const getRentListingsByContact = async (req, res) => {
     }
 };
 
-// Update listings by contact
+// Route 4 Update listings by contact
 export const updateRentListingByContact = async (req, res) => {
-    const { contact } = req.params;
+    const userId = req.userId; // Assuming userId is set by authentication middleware
+    const contact = req.mobileNumber;
+
     const { location, price } = req.body;
 
     try {
@@ -106,9 +116,10 @@ export const updateRentListingByContact = async (req, res) => {
     }
 };
 
-// Delete listings by contact
+// Route 5 Delete listings by contact
 export const deleteRentListingByContact = async (req, res) => {
-    const { contact } = req.params;
+    const userId = req.userId; // Assuming userId is set by authentication middleware
+    const contact = req.mobileNumber;
 
     try {
         if (!contact) {

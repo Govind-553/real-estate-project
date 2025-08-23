@@ -1,30 +1,34 @@
 import SellFlat from "../models/sellflats.js";
 import User from "../models/User.js";
 
-// Create a new sell listing
+// Route 1 Create a new sell listing
 export const createSellListing = async (req, res) => {
-    const { contact } = req.params;
-    let sellData = req.body;
-    sellData = { ...sellData, createdAt: new Date() };
+    const userId = req.userId; // Assuming userId is set by authentication middleware
+    const mobileNumber = req.mobileNumber; // Assuming mobileNumber is set by authentication middleware
+
+    const contact = req.body;
+    let { location, price } = req.body;
+    //const sellData = { location, price };
 
     try {
-        if (!contact || !sellData) {
-            return res.status(400).json({ message: "Missing contact or sell data." });
+       
+        if (!location || !price) {
+            return res.status(400).json({ message: "Missing mobile number or sell data." });
         }
 
-        const user = await User.findOne({ mobileNumber: contact });
+        const user = await User.findOne( contact );
         if (!user) {
-            return res.status(404).json({ message: "User with this contact not found." });
+            return res.status(404).json({ message: "User with this mobile number not found." });
         }
 
-        const { location, price } = sellData;
         if (!location || !price) {
             return res.status(400).json({ message: "Location and price are required." });
         }
 
         const newListing = new SellFlat({
-            ...sellData,
-            contact,
+            location,
+            price,
+            contact: user.contact,
             userId: user._id,
             userName: user.fullName,
         });
@@ -42,8 +46,11 @@ export const createSellListing = async (req, res) => {
     }
 };
 
-// Get all sell listings
+// Route 2 Get all sell listings
 export const getAllSellListings = async (req, res) => {
+    const userId = req.userId; // Assuming userId is set by authentication middleware
+    const { contact } = req.mobileNumber; // Assuming mobileNumber is set by authentication middleware
+    
     try {
         const listings = await SellFlat.find();
         res.status(200).json({
@@ -56,9 +63,11 @@ export const getAllSellListings = async (req, res) => {
     }
 };
 
-// Get listings by contact
+// Route 3 Get listings by contact
 export const getSellListingsByContact = async (req, res) => {
-    const { contact } = req.params;
+    const userId = req.userId; // Assuming userId is set by authentication middleware
+    const { contact } = req.mobileNumber; // Assuming mobileNumber is set by authentication middleware
+    
     try {
         const listings = await SellFlat.find({ contact });
         res.status(200).json({
@@ -71,9 +80,11 @@ export const getSellListingsByContact = async (req, res) => {
     }
 };
 
-// Update listings by contact
+// Route 4 Update listings by contact
 export const updateSellListingByContact = async (req, res) => {
-    const { contact } = req.params;
+    const userId = req.userId; // Assuming userId is set by authentication middleware
+    const { contact } = req.mobileNumber; // Assuming mobileNumber is set by authentication middleware
+    
     const { location, price } = req.body;
 
     try {
@@ -82,8 +93,13 @@ export const updateSellListingByContact = async (req, res) => {
         }
 
         const update = {};
-        if (location) update.location = location;
-        if (price) update.price = price;
+        if (location){
+            update.location = location;
+        }
+
+        if (price) { 
+            update.price = price;
+        }
 
         if (Object.keys(update).length === 0) {
             return res.status(400).json({ message: "No fields provided to update." });
@@ -106,9 +122,10 @@ export const updateSellListingByContact = async (req, res) => {
     }
 };
 
-// Delete listings by contact
+// Route 5 Delete listings by contact
 export const deleteSellListingByContact = async (req, res) => {
-    const { contact } = req.params;
+    const userId = req.userId; // Assuming userId is set by authentication middleware
+    const { contact } = req.mobileNumber; // Assuming mobileNumber is set by authentication middleware
 
     try {
         if (!contact) {

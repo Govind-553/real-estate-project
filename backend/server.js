@@ -5,19 +5,21 @@ import cors from "cors";
 import userRoutes from "./routes/userRoutes.js";
 import rentRoutes from "./routes/rentRoutes.js";
 import sellRoutes from "./routes/sellRoutes.js"; 
-// import cookieParser from "cookie-parser";
+import { verifyAccessToken } from "./middleware/userAuth.js";
+//import { checkAdminNumber } from "./middleware/checkAdminNumber.js";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 const app = express();  // Initialize Express app
 
 app.use(cors());
 app.use(express.json());
-// app.use(cookieParser()); // Optional if you're handling cookies
+app.use(cookieParser()); // Optional if you're handling cookies
 
 // Use routes
 app.use('/api/users', userRoutes);
 app.use('/api/rentflats', rentRoutes);
-app.use('/api/sellflats', sellRoutes); // ✅ Now active
+app.use('/api/sellflats', verifyAccessToken, sellRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
