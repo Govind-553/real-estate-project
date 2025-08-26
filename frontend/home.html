@@ -40,13 +40,25 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
 
+        .logo a {
+            text-decoration: none;
+            color: inherit;
+        }
+
         .logo {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            font-size: 1.5rem;
+            gap: 1rem;
+            font-size: 25px;
             font-weight: 700;
-            color: white;
+            color: #fff;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .logo span {
+            background: transparent;
+            vertical-align: middle;
         }
 
         .logo img {
@@ -54,6 +66,7 @@
             height: 40px;
             border-radius: 8px;
             background: rgba(255, 255, 255, 0.2);
+            vertical-align: middle;
         }
 
         .nav-links {
@@ -1057,10 +1070,12 @@
 </head>
 <body>
     <nav class="navbar">
-        <div class="logo">
-            <img src="img/house.png" alt="Logo">
-            <span>Real Estate</span>
-        </div>
+<div class="logo">
+  <a href="../frontend/index.html">
+    <img src="img/house.png" alt="Logo">
+    <span>Real Estate</span>
+  </a>
+</div>
         
         <ul class="nav-links">
             <li><a href="../frontend/index.html">Home</a></li>
