@@ -1,22 +1,24 @@
 import User from '../models/User.js';
 import bcrypt from "bcrypt";
 import express from 'express';
+import jwt from "jsonwebtoken";
+//import admin from "firebase-admin";
 import { generateRefreshToken, generateAccessToken, sendTokenResponse } from './jwtController.js';
 
 
 //Route 1 - Register user
 export const registerUser = async (req, res) => {
-    const { fullName, contact, password } = req.body;
+    const { fullName, mobileNumber, password } = req.body;
 
 
     try{
     // --- Basic Validation ---
-    if (!fullName || !contact || !password) {
+    if (!fullName || !mobileNumber || !password) {
         return res.status(400).json({ msg: 'Please enter all fields.' });
     }
 
     // Optional: Check if a user with the same mobile number already exists
-    const existingUser = await User.findOne({ contact });
+    const existingUser = await User.findOne({ mobileNumber });
     if (existingUser) {
         return res.status(400).json({ msg: 'A user with this mobile number already exists.' });
     }
@@ -25,30 +27,38 @@ export const registerUser = async (req, res) => {
     if (password.length < 6) {
         return res.status(400).json({ msg: 'Password must be at least 6 characters long.' });
     }
-
-    // creating new user.
-    const newUser = new User({
-        fullName,
-        contact,
-        password,
-    });
-    // Save the new user to the database
-    await newUser.save();
-
+    
     // password hashing
     const salt = await bcrypt.genSalt(10);
-    newUser.password = await bcrypt.hash(password, salt);
+    const hashpassword = await bcrypt.hash(password, salt);
 
-    // Respond with the saved user data and a 201 (Created) status
+    // Store in pending until OTP verified
+    pendingUsers[mobileNumber] = { mobileNumber, password: hashpassword };
 
-    res.status(201).json({
-        status: 'success',
-        message: 'User registered successfully',
-        data: {
-            fullName: newUser.fullName,
-            contact: newUser.contact,
-        }
-    });
+    // creating new user.
+    // const newUser = new User({
+    //     fullName,
+    //     mobileNumber,
+    //     password: hashpassword,
+    // });
+
+    // Save the new user to the database
+    // await newUser.save();
+
+    // Respond with the saved user data
+    // res.status(201).json({
+    //     status: 'success',
+    //     message: 'User registered successfully',
+    //     data: {
+    //         fullName: newUser.fullName,
+    //         contact: newUser.mobileNumber,
+    //         password: newUser.password,
+    //     }
+    // });
+    return res.json({
+    message: "User pending, OTP sent. Please verify",
+    phoneNumber,
+  });
 } catch (error) {
         console.error('Error registering user:', error);
         res.status(500).json({ msg: 'Server error. Please try again later.' });
@@ -138,6 +148,57 @@ export const forgotPassword = async (req, res) => {
         });
     } catch (error) {
         console.error('Error processing forgot password request:', error);
+        res.status(500).json({ msg: 'Server error. Please try again later.' });
+    }
+};
+
+//Route 5 - verify-otp
+export const verifyOtp = async (req, res) => {
+    const { mobileNumber, otp, verificationId } = req.body;
+
+    // Basic validation
+    if (!mobileNumber || !otp || !verificationId) {
+        return res.status(400).json({ msg: 'Please enter all fields.' });
+    }
+
+    try {
+
+        const decodedToken = await admin.auth().verifyIdToken(verificationId);
+
+        // Verify the OTP
+        if (!decodedToken) {
+          return res.status(400).json({ error: "Invalid OTP" });
+        }
+
+        // Move from pending to registered users
+        const user = pendingUsers[mobileNumber];
+        if (!user) {
+          return res.status(400).json({ error: "No pending user found" });
+        }
+
+        // Generate JWT for login session
+        const token = jwt.sign({ mobileNumber }, "SECRET_KEY", { expiresIn: "1h" });
+
+        // If OTP is valid, create the user
+        const newUser = new User({
+            fullName: user.fullName,
+            mobileNumber: user.mobileNumber,
+            password: user.password,
+        });
+
+        await newUser.save();
+        delete pendingUsers[mobileNumber]; // Remove from pendingUsers
+
+        res.status(201).json({
+            status: 'success',
+            message: 'User registered successfully',
+            data: {
+                fullName: newUser.fullName,
+                contact: newUser.mobileNumber,
+            }
+        });
+    } catch (error) {
+        console.error('Error verifying OTP:', error);
         res.status(500).json({ msg: 'Server error. Please try again later.' });
     }
 };
