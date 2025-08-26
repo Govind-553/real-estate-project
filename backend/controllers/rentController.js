@@ -4,13 +4,13 @@ import User from "../models/User.js";
 // Route 1 Create a new rent listing
 export const createRentListing = async (req, res) => {
     
-    const userId = req.userId; // Assuming userId is set by authentication middleware
     const mobileNumber = req.mobileNumber; // Assuming phoneNumber is set by authentication middleware
 
     const { contact, location, price } = req.body;
     const rentData = { location, price };
 
     try {
+
         // Validate input data
         if ( !contact || !location || !price ) {
             return res.status(400).json({ message: "Missing contact or rent data." });
@@ -51,7 +51,7 @@ export const createRentListing = async (req, res) => {
 
 // Route 2 Get all rent listings
 export const getAllRentListings = async (req, res) => {
-     const userId = req.userId; // Assuming userId is set by authentication middleware
+
     const mobileNumber = req.mobileNumber;
 
     try {
@@ -65,7 +65,7 @@ export const getAllRentListings = async (req, res) => {
         res.status(200).json({
             message: "All the flats for rent are listed below.",
             count: listings.length,
-            rentFlatsList: listings
+            rentFlatsList: listings,
         });
     } catch (error) {
         console.error("Error fetching listings:", error.message);
@@ -75,6 +75,7 @@ export const getAllRentListings = async (req, res) => {
 
 //  Route 3 Get listings by contact
 export const getRentListingsByContact = async (req, res) => {
+
      // Assuming mobileNumber is set by authentication middleware
     const mobileNumber = Number(req.mobileNumber);
 
@@ -83,11 +84,10 @@ export const getRentListingsByContact = async (req, res) => {
     try {
          //if contact number is not provided.
         if (!contact) {
-            res.status(400).json({ message: "contact Number is required." });
-            return;
+            return res.status(400).json({ message: "contact Number is required." });
         }
 
-        const user = await User.find({ mobileNumber: contact });
+        const user = await User.findOne({ mobileNumber: contact });
         if (!user) {
             return res.status(404).json({ message: "This contact is not registered." });
         }
@@ -102,7 +102,7 @@ export const getRentListingsByContact = async (req, res) => {
         //successfully fetched listings.
         res.status(200).json({
             message: "All the flats of the specific agent are listed below.",
-            sellFlatsList: listings
+            rentFlatsList: listings,
         });
 
     } catch (error) {
@@ -113,7 +113,7 @@ export const getRentListingsByContact = async (req, res) => {
 
 // Route 4 Update listings by contact
 export const updateRentListingByContact = async (req, res) => {
-    const userId = req.userId; // Assuming userId is set by authentication middleware
+    
     const contact = req.mobileNumber;
 
     const { location, price } = req.body;

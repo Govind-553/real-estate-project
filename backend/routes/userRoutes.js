@@ -1,7 +1,7 @@
 // Import required packages
 import express from "express";
 const router = express.Router(); 
-import {registerUser, forgotPassword, loginUser, }  from "../controllers/userController.js";
+import {registerUser, forgotPassword, loginUser, verifyOtp, }  from "../controllers/userController.js";
 
 // Import the User model
 import User from "../models/User.js";
@@ -22,10 +22,7 @@ router.post("/resend-otp", (req, res) => {
 });
 
 //Route 5 - Verify OTP
-router.post("/verify-otp", (req, res) => {
-    const { mobileNumber, otp } = req.body;
-    // Logic to verify OTP
-});
+router.post("/verify-otp", verifyOtp);
 
 //Route 7 - Generate the new access token using refressToken.
 
