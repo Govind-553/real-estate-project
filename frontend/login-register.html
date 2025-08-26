@@ -713,7 +713,7 @@
                 setupEventListeners();
             };
 
-            const renderOtpForm = () => {
+            const renderOtpForm = (mode) => {
                 formContainer.innerHTML = `
                     <h2>Verify Your Mobile</h2>
                     <p class="message-text">A 6-digit OTP has been sent to your mobile number.</p>
@@ -732,7 +732,7 @@
                     </form>
                     <p class="message-text">Didn't receive the OTP? <a href="#">Resend OTP</a></p>
                 `;
-                setupOtpLogic();
+                setupOtpLogic(mode);
                 setupEventListeners();
             };
 
@@ -795,6 +795,21 @@
                 }
             };
 
+            const renderRegistrationConfirmPage = () => {
+                formContainer.innerHTML = `
+                    <div style="text-align:center; padding: 2rem;">
+                        <i class="fa-solid fa-circle-check" style="font-size: 4rem; color: var(--secondary-blue); margin-bottom: 1rem;"></i>
+                        <h2>Registration Confirm !</h2>
+                        <p>Your account has been registered successfully.</p>
+                        <button class="btn" id="backToLoginBtn" style="margin-top: 2rem;">Back to Login</button>
+                    </div>
+                `;
+                const backToLoginBtn = document.getElementById('backToLoginBtn');
+                if (backToLoginBtn) {
+                    backToLoginBtn.addEventListener('click', renderLoginForm);
+                }
+            };
+
             const setupEventListeners = () => {
                 const togglePasswordIcons = document.querySelectorAll('.toggle-password');
                 togglePasswordIcons.forEach(icon => {
@@ -835,14 +850,15 @@
                 if (registerForm) registerForm.addEventListener('submit', (e) => {
                     e.preventDefault();
                     alert("Register form submitted. Simulating OTP sending...");
-                    renderOtpForm();
+                    renderOtpForm("register");
                 });
 
                 const forgotPasswordForm = document.getElementById('forgotPasswordForm');
                 if (forgotPasswordForm) forgotPasswordForm.addEventListener('submit', (e) => {
                     e.preventDefault();
                     alert("Forgot Password request submitted. Simulating password reset flow...");
-                    renderPasswordResetForm();
+                    //renderPasswordResetForm();
+                    renderOtpForm("forgotPassword");
                 });
 
                 const newPasswordForm = document.getElementById('newPasswordForm');
@@ -859,7 +875,7 @@
                 });
             };
 
-            const setupOtpLogic = () => {
+            const setupOtpLogic = (mode) => {
                 const otpInputs = document.querySelectorAll('.otp-input');
                 const verifyOtpBtn = document.getElementById('verifyOtpBtn');
 
@@ -890,7 +906,12 @@
                     e.preventDefault();
                     const otp = Array.from(otpInputs).map(input => input.value).join('');
                     alert(`Verifying OTP: ${otp}. Simulating verification success...`);
-                    renderPasswordResetForm();
+                    if (mode === "register") {
+                        renderRegistrationConfirmPage();
+                    } 
+                    if (mode === "forgotPassword") {
+                        renderPasswordResetForm();
+                    }
                 });
             };
 
