@@ -374,15 +374,31 @@
         </div>
     </main>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const formContainer = document.getElementById('form-container');
+    <script type = "module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-            // Dummy user credentials for testing
-            const dummyUser = {
-                mobile: "9876543210",
-                password: "password123"
-            };
+        const firebaseConfig = {
+            apiKey: "AIzaSyArmp7LtzuH4GKXUX9xKKMgaMHV1ioSeKU",
+      authDomain: "realestate-ba037.firebaseapp.com",
+      projectId: "realestate-ba037",
+      storageBucket: "realestate-ba037.appspot.com",
+      messagingSenderId: "1014619180710",
+      appId: "1:1014619180710:web:49f231abc721762a472e67",
+      measurementId: "G-YS2N7C27EC"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        //let confirmationResult;
+        let recaptchaVerifier;
+        let lastPhoneNumber = null;
+        let lastMode = null;
+        let confirmationResult;
+
+        function setupFirebaseAndForms() {
+            
+            const formContainer = document.getElementById('form-container');
 
             const renderLoginForm = () => {
                 formContainer.innerHTML = `
@@ -410,6 +426,8 @@
                     <p class="message-text">Don't have an account? <a href="#" id="showRegisterLink">Sign up</a></p>
                 `;
                 setupEventListeners();
+                setupRecaptcha('recaptcha-container-login', 'loginSendOtpBtn', 'loginMobile');
+                
             };
 
             const renderRegisterForm = () => {
@@ -439,29 +457,8 @@
                     <p class="message-text">Already have an account? <a href="#" id="showLoginLink">Login</a></p>
                 `;
                 setupEventListeners();
-            };
+                setupRecaptcha('recaptcha-container-register', 'sendOtpBtn', 'regMobile');
 
-            const renderOtpForm = (mode) => {
-                formContainer.innerHTML = `
-                    <h2>Verify Your Mobile</h2>
-                    <p class="message-text">A 6-digit OTP has been sent to your mobile number.</p>
-                    <form id="otpForm">
-                        <div class="otp-box">
-                            <div class="otp-row">
-                                <input type="text" maxlength="1" class="otp-input" inputmode="numeric" />
-                                <input type="text" maxlength="1" class="otp-input" inputmode="numeric" />
-                                <input type="text" maxlength="1" class="otp-input" inputmode="numeric" />
-                                <input type="text" maxlength="1" class="otp-input" inputmode="numeric" />
-                                <input type="text" maxlength="1" class="otp-input" inputmode="numeric" />
-                                <input type="text" maxlength="1" class="otp-input" inputmode="numeric" />
-                            </div>
-                        </div>
-                        <button type="submit" class="btn" id="verifyOtpBtn" disabled>Verify OTP</button>
-                    </form>
-                    <p class="message-text">Didn't receive the OTP? <a href="#">Resend OTP</a></p>
-                `;
-                setupOtpLogic(mode);
-                setupEventListeners();
             };
 
             const renderForgotPasswordForm = () => {
@@ -476,15 +473,132 @@
                                 <input type="tel" id="fpMobile" name="mobile" placeholder="Enter your mobile number" required pattern="^[6-9]\\d{9}$">
                             </div>
                         </div>
-                        <button type="submit" class="btn">Reset Password</button>
+                            <div id="recaptcha-container-forgot"></div>
+                        <button type="submit" class="btn" id="sendOtpBtn">Send OTP</button>
                     </form>
                     <p class="message-text"><a href="#" id="showLoginLink">Back to Login</a></p>
                 `;
                 setupEventListeners();
+                setupRecaptcha('recaptcha-container-forgot', 'sendOtpBtn', 'fpMobile');
+
             };
 
+                // Store the last phone number and recaptcha info for resend
+                const renderOtpForm = (mode, phoneNumber) => {
+                    lastMode = mode;
+                    formContainer.innerHTML = `
+                        <h2>Verify Your Mobile</h2>
+                        <p class="message-text">A 6-digit OTP has been sent to your mobile number.</p>
+                        <form id="otpForm">
+                            <div class="otp-box">
+                                <div class="otp-row">
+                                    <input type="text" maxlength="1" class="otp-input" inputmode="numeric" />
+                                    <input type="text" maxlength="1" class="otp-input" inputmode="numeric" />
+                                    <input type="text" maxlength="1" class="otp-input" inputmode="numeric" />
+                                    <input type="text" maxlength="1" class="otp-input" inputmode="numeric" />
+                                    <input type="text" maxlength="1" class="otp-input" inputmode="numeric" />
+                                    <input type="text" maxlength="1" class="otp-input" inputmode="numeric" />
+                                </div>
+                            </div>
+                            <button type="submit" class="btn" id="verifyOtpBtn">Verify OTP</button>
+                            <p class="message-text">Didn't receive the OTP? <a href="#" id="resendOtpLink">Resend OTP</a></p>
+                        </form>
+                        <p class="message-text"><a href="#" id="changeNumberLink">Change Number</a></p>
+                    `;
+                    setupOtpLogic(mode, phoneNumber);
+                    setupEventListeners();
+                    // Add resend OTP logic
+const resendOtpLink = document.getElementById('resendOtpLink');
+if (resendOtpLink) {
+    resendOtpLink.addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        if (!lastPhoneNumber || !lastPhoneNumber.startsWith("+91")) {
+            alert('Phone number not found. Please go back and enter your number again.');
+            return;
+        }
+
+        try {
+            // Re-initialize reCAPTCHA
+            console.log("📌 Initializing new reCAPTCHA...");
+            recaptchaVerifier = new RecaptchaVerifier(
+                'recaptcha-container-forgot',
+                { size: 'invisible' },
+                auth
+            );
+            await recaptchaVerifier.render();
+
+            // Make sure phone is in +E.164 format
+            await setupRecaptcha("recaptcha-container-forgot");
+            confirmationResult = await signInWithPhoneNumber(auth, lastPhoneNumber, recaptchaVerifier);
+            window.confirmationResult = confirmationResult;
+            alert('OTP resent!');
+        } catch (error) {
+            console.error(error);
+            alert('Error resending OTP: ' + error.message);
+        }
+    });
+};
+
+
+
+const setupRecaptcha = (containerId, buttonId, loginMobile) => {
+    // Create reCAPTCHA only once
+    if (recaptchaVerifier) {
+        recaptchaVerifier.clear();
+    }
+
+    if (!recaptchaVerifier) {
+        recaptchaVerifier = new RecaptchaVerifier(containerId, {
+            size: "invisible",
+            callback: (response) => {
+                console.log("reCAPTCHA solved:", response);
+            },
+            "expired-callback": () => {
+                alert("reCAPTCHA expired. Please try again.");
+            }
+        }, auth);
+
+        // Must render it
+        recaptchaVerifier.render().then(widgetId => {
+            window.recaptchaWidgetId = widgetId;
+        });
+    console.log("📌 reCAPTCHA initialized on:", containerId);
+};
+    }
+
+    // Avoid adding duplicate event listeners
+    const sendOtpBtn = document.getElementById(buttonId);
+    if (!sendOtpBtn.dataset.listenerAdded) {
+        sendOtpBtn.addEventListener("click", async (event) => {
+            event.preventDefault();
+
+            const phoneNumber = "+91" + document.getElementById(loginMobile).value;
+
+            // Validate Indian mobile number
+            if (!/^\+91[6-9]\d{9}$/.test(phoneNumber)) {
+                alert("Please enter a valid 10-digit Indian mobile number.");
+                return;
+            }
+
+            try {
+                const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+                window.confirmationResult = confirmationResult; // store globally
+                lastPhoneNumber = phoneNumber;
+                alert("OTP sent!");
+                renderOtpForm(lastMode, phoneNumber); // show OTP form
+            } catch (error) {
+                console.error(error);
+                alert("Error sending OTP: " + error.message);
+            }
+        });
+        sendOtpBtn.dataset.listenerAdded = "true"; // mark listener added
+    }
+};
+
+
             const renderPasswordResetForm = () => {
-                formContainer.innerHTML = `
+                formContainer.innerHTML = `s
                     <h2>Set New Password</h2>
                     <form id="newPasswordForm">
                         <div class="input-group">
@@ -581,21 +695,39 @@
                         alert("Invalid mobile number or password. Please try again.");
                     }
                 });
+                const changeNumberLink = document.getElementById('changeNumberLink');
+                if (changeNumberLink) changeNumberLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    renderLoginForm();
+                });
 
                 const registerForm = document.getElementById('registerForm');
                 if (registerForm) registerForm.addEventListener('submit', (e) => {
                     e.preventDefault();
                     alert("Register form submitted. Simulating OTP sending...");
-                    renderOtpForm("register");
+                    renderOtpForm("register", phoneNumber);
                 });
 
                 const forgotPasswordForm = document.getElementById('forgotPasswordForm');
-                if (forgotPasswordForm) forgotPasswordForm.addEventListener('submit', (e) => {
+                if (forgotPasswordForm) forgotPasswordForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    alert("Forgot Password request submitted. Simulating password reset flow...");
-                    //renderPasswordResetForm();
-                    renderOtpForm("forgotPassword");
+                    const phoneNumber = '+91' + document.getElementById('fpMobile').value;
+
+                    if (!/^\+91[6-9]\d{9}$/.test(phoneNumber)) {
+                        alert("Please enter a valid 10-digit mobile number.");
+                        return;
+                    }
+
+                    try {
+                        confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+                        window.confirmationResult = confirmationResult;
+                        alert("OTP sent for password reset!");
+                        renderOtpForm("forgotPassword", phoneNumber);
+                    } catch (error) {
+                        alert("Error sending OTP: " + error.message);
+                    }
                 });
+
 
                 const newPasswordForm = document.getElementById('newPasswordForm');
                 if (newPasswordForm) newPasswordForm.addEventListener('submit', (e) => {
@@ -609,26 +741,24 @@
                         alert("Passwords do not match. Please try again.");
                     }
                 });
-            };
-
-            const setupOtpLogic = (mode) => {
+             };
+               const setupOtpLogic = (mode, phoneNumber) => {
                 const otpInputs = document.querySelectorAll('.otp-input');
                 const verifyOtpBtn = document.getElementById('verifyOtpBtn');
 
                 otpInputs[0].focus();
 
-                otpInputs.forEach((input, index) => {
+                otpInputs.forEach((input, index, arr) => {
                     input.addEventListener('input', () => {
                         input.value = input.value.replace(/[^0-9]/g, '').slice(0, 1);
-                        if (input.value && index < otpInputs.length - 1) {
-                            otpInputs[index + 1].focus();
+                        if (input.value && index < arr.length - 1) {
+                            arr[index + 1].focus();
                         }
                         checkOtpFilled();
                     });
-
                     input.addEventListener('keydown', (e) => {
                         if (e.key === 'Backspace' && !input.value && index > 0) {
-                            otpInputs[index - 1].focus();
+                            arr[index - 1].focus();
                         }
                     });
                 });
@@ -637,22 +767,48 @@
                     const allFilled = Array.from(otpInputs).every(input => input.value.length === 1);
                     verifyOtpBtn.disabled = !allFilled;
                 };
+                
+                checkOtpFilled(); // Initial check
 
-                verifyOtpBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
+                verifyOtpBtn.addEventListener('click', async (event) => {
+                    event.preventDefault();
                     const otp = Array.from(otpInputs).map(input => input.value).join('');
-                    alert(`Verifying OTP: ${otp}. Simulating verification success...`);
-                    if (mode === "register") {
-                        renderRegistrationConfirmPage();
-                    } 
-                    if (mode === "forgotPassword") {
-                        renderPasswordResetForm();
+
+                    if (otp.length !== 6) {
+                        alert("Please enter a valid 6-digit OTP.");
+                        return;
+                    }
+
+                   
+
+                    try {
+                        const result = await window.confirmationResult.confirm(otp);
+                        const user = result.user;
+                        alert("OTP verified! Phone: " + user.phoneNumber);
+                        if (mode === "forgotPassword") {
+                            // Handle forgot password flow
+                            //alert(".");
+                            renderPasswordResetForm();
+                        } else if (mode === "register") {
+                            // Handle post-registration flow
+                            alert("Registration successful! You can now log in.");
+                            renderRegistrationConfirmPage();
+                        }
+
+                        // At this point, the user is signed in. You can redirect or perform other actions.
+                        // window.location.href = "../frontend/home.html"; // Example redirect
+                    } catch (error) {
+                        console.error("OTP verification failed:", error);
+                        alert("OTP verification failed: " + error.message);
                     }
                 });
             };
 
             renderLoginForm();
-        });
+        }
+
+    document.addEventListener('DOMContentLoaded', setupFirebaseAndForms);
+
     </script>
 </body>
 </html>
