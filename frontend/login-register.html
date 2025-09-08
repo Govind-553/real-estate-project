@@ -392,6 +392,8 @@
 
         //let confirmationResult;
         let recaptchaVerifier;
+        let recaptchaRegister, recaptchaForgot;
+        let tempFullName, tempPhoneNumber, tempPassword;
         let lastPhoneNumber = null;
         let lastMode = null;
         let confirmationResult;
@@ -399,6 +401,29 @@
         function setupFirebaseAndForms() {
             
             const formContainer = document.getElementById('form-container');
+            // For Register
+            function setupRecaptchaRegister() {
+                if (!recaptchaRegister) { // only create once
+                    recaptchaRegister = new RecaptchaVerifier(
+                        'recaptcha-container-register',
+                        { size: 'invisible' },
+                        auth
+        );
+        recaptchaRegister.render();
+    }
+}
+
+// For Forgot Password
+function setupRecaptchaForgot() {
+    if (!recaptchaForgot) { // only create once
+        recaptchaForgot = new RecaptchaVerifier(
+            'recaptcha-container-forgot',
+            { size: 'invisible' },
+            auth
+        );
+        recaptchaForgot.render();
+    }
+}
 
             const renderLoginForm = () => {
                 formContainer.innerHTML = `
@@ -452,7 +477,8 @@
                                 <i class="fa-solid fa-eye-slash toggle-password"></i>
                             </div>
                         </div>
-                        <button type="submit" class="btn">Register</button>
+                        <div id="recaptcha-container-register"></div>
+                        <button type="submit" id="sendOtpBtn" class="btn">Register</button>
                     </form>
                     <p class="message-text">Already have an account? <a href="#" id="showLoginLink">Login</a></p>
                 `;
@@ -484,7 +510,7 @@
             };
 
                 // Store the last phone number and recaptcha info for resend
-                const renderOtpForm = (mode, phoneNumber) => {
+            const renderOtpForm = (mode, phoneNumber) => {
                     lastMode = mode;
                     formContainer.innerHTML = `
                         <h2>Verify Your Mobile</h2>
@@ -505,67 +531,67 @@
                         </form>
                         <p class="message-text"><a href="#" id="changeNumberLink">Change Number</a></p>
                     `;
+                    // 👉 For register, add extra fields (name + password)
+    /*if (mode === "register") {
+        container.innerHTML += `
+            <div id="extra-fields">
+                <input type="text" id="regName" placeholder="Enter your name" required />
+                <input type="password" id="regPassword" placeholder="Enter your password" required />
+            </div>
+        `;
+    }*/
+
                     setupOtpLogic(mode, phoneNumber);
                     setupEventListeners();
+
                     // Add resend OTP logic
-const resendOtpLink = document.getElementById('resendOtpLink');
-if (resendOtpLink) {
-    resendOtpLink.addEventListener('click', async (e) => {
-        e.preventDefault();
+                const resendOtpLink = document.getElementById('resendOtpLink');
+                    if (resendOtpLink) {
+                        resendOtpLink.addEventListener('click', async (e) => {
+                        e.preventDefault();
+    
+                        if (!lastPhoneNumber || !lastPhoneNumber.startsWith("+91")) {
+                            alert('Phone number not found. Please go back and enter your number again.');
+                            return;
+                        }
 
-        if (!lastPhoneNumber || !lastPhoneNumber.startsWith("+91")) {
-            alert('Phone number not found. Please go back and enter your number again.');
-            return;
-        }
+                        try {
+                            recaptchaForgot();
+                            // Make sure phone is in +E.164 formate
+                            confirmationResult = await signInWithPhoneNumber(auth, lastPhoneNumber, recaptchaForgot);
+                            window.confirmationResult = confirmationResult;
+                            alert('OTP resent!');
+                        } catch (error) {
+                            console.error(error);
+                            alert('Error resending OTP: ' + error.message);
+                        }
+                    });
+                };
 
-        try {
-            // Re-initialize reCAPTCHA
-            console.log("📌 Initializing new reCAPTCHA...");
-            recaptchaVerifier = new RecaptchaVerifier(
-                'recaptcha-container-forgot',
-                { size: 'invisible' },
-                auth
-            );
-            await recaptchaVerifier.render();
-
-            // Make sure phone is in +E.164 format
-            await setupRecaptcha("recaptcha-container-forgot");
-            confirmationResult = await signInWithPhoneNumber(auth, lastPhoneNumber, recaptchaVerifier);
-            window.confirmationResult = confirmationResult;
-            alert('OTP resent!');
-        } catch (error) {
-            console.error(error);
-            alert('Error resending OTP: ' + error.message);
-        }
-    });
-};
-
-
-
-const setupRecaptcha = (containerId, buttonId, loginMobile) => {
-    // Create reCAPTCHA only once
-    if (recaptchaVerifier) {
-        recaptchaVerifier.clear();
-    }
-
-    if (!recaptchaVerifier) {
-        recaptchaVerifier = new RecaptchaVerifier(containerId, {
-            size: "invisible",
-            callback: (response) => {
-                console.log("reCAPTCHA solved:", response);
-            },
-            "expired-callback": () => {
-                alert("reCAPTCHA expired. Please try again.");
-            }
-        }, auth);
-
-        // Must render it
-        recaptchaVerifier.render().then(widgetId => {
-            window.recaptchaWidgetId = widgetId;
-        });
-    console.log("📌 reCAPTCHA initialized on:", containerId);
-};
-    }
+                const setupRecaptcha = (containerId, buttonId, loginMobile) => {
+                        // Create reCAPTCHA only once
+                        if (recaptchaVerifier) {                     
+                            recaptchaVerifier.clear();
+                        }
+                    
+                        if (!recaptchaVerifier) {
+                            recaptchaVerifier = new RecaptchaVerifier(containerId, {
+                                size: "invisible",
+                                callback: (response) => {
+                                    console.log("reCAPTCHA solved:", response);
+                                },
+                                "expired-callback": () => {
+                                    alert("reCAPTCHA expired. Please try again.");
+                                }
+                            }, auth);
+                    
+                            // Must render it
+                            recaptchaVerifier.render().then(widgetId => {
+                                window.recaptchaWidgetId = widgetId;
+                            });
+                        console.log("📌 reCAPTCHA initialized on:", containerId);
+                    };
+                        }
 
     // Avoid adding duplicate event listeners
     const sendOtpBtn = document.getElementById(buttonId);
@@ -582,7 +608,8 @@ const setupRecaptcha = (containerId, buttonId, loginMobile) => {
             }
 
             try {
-                const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+                setupRecaptchaForgot();
+                confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaForgot);
                 window.confirmationResult = confirmationResult; // store globally
                 lastPhoneNumber = phoneNumber;
                 alert("OTP sent!");
@@ -701,12 +728,36 @@ const setupRecaptcha = (containerId, buttonId, loginMobile) => {
                     renderLoginForm();
                 });
 
-                const registerForm = document.getElementById('registerForm');
-                if (registerForm) registerForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    alert("Register form submitted. Simulating OTP sending...");
-                    renderOtpForm("register", phoneNumber);
-                });
+
+
+               const registerForm = document.getElementById('registerForm');
+if (registerForm) registerForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const phoneNumber = "+91" + document.getElementById('regMobile').value;
+
+    if (!/^\+91[6-9]\d{9}$/.test(phoneNumber)) {
+        alert("Please enter a valid 10-digit mobile number.");
+        return;
+    }
+
+    try {
+        // Make sure phone is in +E.164 format
+        setupRecaptchaRegister();
+
+        confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaRegister);
+        window.confirmationResult = confirmationResult;
+        alert("OTP sent for registration!");
+
+        // When user fills registration form
+tempFullName = document.getElementById("regName").value;
+tempPassword = document.getElementById("regPassword").value;
+
+        renderOtpForm("register", phoneNumber);
+    } catch (error) {
+        alert("Error sending OTP: " + error.message);
+    }
+});
+
 
                 const forgotPasswordForm = document.getElementById('forgotPasswordForm');
                 if (forgotPasswordForm) forgotPasswordForm.addEventListener('submit', async (e) => {
@@ -719,7 +770,8 @@ const setupRecaptcha = (containerId, buttonId, loginMobile) => {
                     }
 
                     try {
-                        confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+                        setupRecaptchaForgot();
+                        confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaForgot);
                         window.confirmationResult = confirmationResult;
                         alert("OTP sent for password reset!");
                         renderOtpForm("forgotPassword", phoneNumber);
@@ -742,6 +794,7 @@ const setupRecaptcha = (containerId, buttonId, loginMobile) => {
                     }
                 });
              };
+
                const setupOtpLogic = (mode, phoneNumber) => {
                 const otpInputs = document.querySelectorAll('.otp-input');
                 const verifyOtpBtn = document.getElementById('verifyOtpBtn');
@@ -790,9 +843,40 @@ const setupRecaptcha = (containerId, buttonId, loginMobile) => {
                             //alert(".");
                             renderPasswordResetForm();
                         } else if (mode === "register") {
-                            // Handle post-registration flow
-                            alert("Registration successful! You can now log in.");
-                            renderRegistrationConfirmPage();
+                            try {
+                                // Example extra fields you might collect
+                                const fullName = tempFullName;
+                                const password = tempPassword;
+
+                                if (!fullName || !password) {
+                                    alert("Name or password field not found in the DOM!");
+                                    return;
+                                }
+                                
+                        
+                                // Send data to your backend
+                                const response = await fetch("http://localhost:3000/api/users/create", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({
+                                        fullName: fullName,
+                                        mobileNumber: user.phoneNumber, // verified mobile from OTP
+                                        password: password
+                                     })
+                                });
+                        
+                             const data = await response.json();
+                        
+                                if (response.ok) {
+                                    alert("✅ " + data.message);
+                                    renderRegistrationConfirmPage(); // show success page
+                                } else {
+                                    alert("❌ " + data.message);
+                                }
+                            } catch (error) {
+                                console.error("API error:", error);
+                                alert("Error registering user: " + error.message);
+                            }
                         }
 
                         // At this point, the user is signed in. You can redirect or perform other actions.

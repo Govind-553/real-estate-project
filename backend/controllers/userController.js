@@ -9,6 +9,9 @@ import { generateRefreshToken, generateAccessToken, sendTokenResponse } from './
 //Route 1 - Register user
 export const registerUser = async (req, res) => {
     const { fullName, mobileNumber, password } = req.body;
+    // Temporary in-memory store for OTP verification
+    const pendingUsers = {};
+
 
 
     try{
@@ -33,31 +36,31 @@ export const registerUser = async (req, res) => {
     const hashpassword = await bcrypt.hash(password, salt);
 
     // Store in pending until OTP verified
-    pendingUsers[mobileNumber] = { mobileNumber, password: hashpassword };
+    pendingUsers[mobileNumber] = {fullName: fullName, mobileNumber: mobileNumber, password: hashpassword };
 
     // creating new user.
-    // const newUser = new User({
-    //     fullName,
-    //     mobileNumber,
-    //     password: hashpassword,
-    // });
+    const newUser = new User({
+        fullName,
+        mobileNumber,
+        password: hashpassword,
+    });
 
     // Save the new user to the database
-    // await newUser.save();
+    await newUser.save();
 
-    // Respond with the saved user data
-    // res.status(201).json({
-    //     status: 'success',
-    //     message: 'User registered successfully',
-    //     data: {
-    //         fullName: newUser.fullName,
-    //         contact: newUser.mobileNumber,
-    //         password: newUser.password,
-    //     }
-    // });
+    //Respond with the saved user data
+    res.status(201).json({
+        status: 'success',
+        message: 'User registered successfully',
+        data: {
+            fullName: newUser.fullName,
+            contact: newUser.mobileNumber,
+            password: newUser.password,
+        }
+    });
     return res.json({
     message: "User pending, OTP sent. Please verify",
-    phoneNumber,
+    mobileNumber: mobileNumber,
   });
 } catch (error) {
         console.error('Error registering user:', error);
