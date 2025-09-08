@@ -35,7 +35,7 @@
         } 
 
         .data-section, .search-section {
-             scroll-margin-top: 85px;
+            scroll-margin-top: 85px;
         }
 
         /* --- Navbar Styles --- */
@@ -312,6 +312,7 @@
             padding: 15px;
             text-align: left;
             border-bottom: 1px solid #e2e8f0;
+            word-wrap: break-word;
         }
 
         .data-table th {
@@ -497,16 +498,70 @@
             .search-form { flex-direction: column; align-items: stretch; }
             .data-section { padding: 1rem; }
             
-            .data-table-wrapper {
-                width: 100%;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
+            /* Mobile Table Styles */
+            .data-table.mobile-table,
+            .data-table.mobile-table thead,
+            .data-table.mobile-table tbody,
+            .data-table.mobile-table th,
+            .data-table.mobile-table td,
+            .data-table.mobile-table tr {
+                display: block;
             }
 
-            .data-table {
+            .data-table.mobile-table thead {
+                display: none;
+            }
+
+            .data-table.mobile-table tr {
+                border: 1px solid #ddd;
+                margin-bottom: 15px;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            .data-table.mobile-table td {
+                border: none;
+                position: relative;
+                padding-left: 50%;
+                text-align: right;
+                border-bottom: 1px solid #f2f2f2;
+            }
+
+            .data-table.mobile-table td:last-child {
+                border-bottom: none;
+            }
+            
+            .data-table.mobile-table td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 0;
+                width: 45%;
+                padding: 12px;
+                font-weight: bold;
+                color: #333;
                 white-space: nowrap;
+                text-align: left;
+                top: 50%;
+                transform: translateY(-50%);
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
             }
         }
+        
+        @media (min-width: 769px) {
+            .data-table.mobile-table {
+                display: table;
+            }
+            .data-table.mobile-table thead,
+            .data-table.mobile-table tbody,
+            .data-table.mobile-table tr,
+            .data-table.mobile-table th,
+            .data-table.mobile-table td {
+                display: table-cell;
+            }
+        }
+
         /* Footer Styles */
         .footer {
             background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
@@ -907,7 +962,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // --- Initial State & Data ---
-    let usersData = [
+    const usersData = [
         { name: "Rahul Sharma", contact: "9876543210", date: "2025-01-01", type: "Owner", status: "Active" },
         { name: "Priya Singh", contact: "9123456789", date: "2025-06-01", type: "Agent", status: "Inactive" },
         { name: "Arjun Patel", contact: "8012345678", date: "2025-02-11", type: "Owner", status: "Active" },
@@ -918,6 +973,7 @@ document.addEventListener('DOMContentLoaded', function() {
     ];
 
     // --- DOM Element Selectors ---
+    const usersTable = document.getElementById('usersTable');
     const usersBody = document.getElementById('usersBody');
     const hamburger = document.querySelector('.hamburger');
     const navLinks = document.querySelector('.nav-links');
@@ -950,11 +1006,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const statusClass = `status-${user.status.toLowerCase()}`;
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${user.name}</td>
-                <td>+91 ${user.contact}</td>
-                <td>${user.date}</td>
-                <td>${user.type}</td>
-                <td><span class="${statusClass}">${user.status}</span></td>
+                <td data-label="Name">${user.name}</td>
+                <td data-label="Contact">+91 ${user.contact}</td>
+                <td data-label="Date Joined">${user.date}</td>
+                <td data-label="User Type">${user.type}</td>
+                <td data-label="Status"><span class="${statusClass}">${user.status}</span></td>
             `;
             usersBody.appendChild(row);
         });
@@ -967,6 +1023,14 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('ownerUsers').textContent = usersData.filter(u => u.type === 'Owner').length;
         document.getElementById('activeUsers').textContent = usersData.filter(u => u.status === 'Active').length;
         document.getElementById('inactiveUsers').textContent = usersData.filter(u => u.status === 'Inactive').length;
+    }
+    
+    function checkOrientation() {
+        if (window.innerWidth <= 768 && window.innerHeight > window.innerWidth) {
+            usersTable.classList.add('mobile-table');
+        } else {
+            usersTable.classList.remove('mobile-table');
+        }
     }
 
     // --- Panel Management ---
@@ -1032,8 +1096,17 @@ document.addEventListener('DOMContentLoaded', function() {
         statusDropdown.classList.toggle('active');
     });
 
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!statusDropdown.contains(e.target)) {
+        statusDropdown.classList.remove('active');
+      }
+    });
+
     // --- Initial Load ---
     renderTable(usersData); // Render the initial table
+    checkOrientation(); // Initial check for mobile view
+    window.addEventListener('resize', checkOrientation); // Re-check on window resize
 });
 </script>
 
