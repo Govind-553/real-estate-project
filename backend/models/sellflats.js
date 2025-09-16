@@ -1,30 +1,40 @@
 import mongoose from 'mongoose';
-import User from './User.js';
 
 const sellFlatSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: false
     },
     userName: {
         type: String,
-        required: true
+        required: false
     },
     location: {
         type: String,
         required: true
     },
+    propertyType: {
+        type: String,
+        required: true // Added this field
+    },
     price: {
         type: Number,
         required: true
-        
     },
     contact: {
         type: Number,
         required: [true, 'Mobile number is required.'],
         trim: true,
         match: [/^[0-9]{10}$/, 'Please fill a valid 10-digit mobile number.']
+    },
+    date: {
+        type: Date,
+        required: true // Added this field
+    },
+    ownershipType: {
+        type: String,
+        required: true // Added this field
     },
     createdAt: {
         type: Date,

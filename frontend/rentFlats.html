@@ -1258,10 +1258,12 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const BASE_URL = 'http://localhost:3000/api/rentflats';
+        let properties = [];
+
         // --- Custom Modal Functionality (replaces alert and confirm) ---
         const customModal = document.getElementById('customModal');
         const modalMessage = document.getElementById('modalMessage');
-        const modalActions = document.getElementById('modalActions');
         const okBtn = document.getElementById('okBtn');
         const confirmYesBtn = document.getElementById('confirmYesBtn');
         const confirmNoBtn = document.getElementById('confirmNoBtn');
@@ -1304,18 +1306,6 @@
         });
 
 
-        // --- Data Model (our single source of truth) ---
-        let properties = [
-            { id: 1, location: 'Kandivali West', propertyType: '1 RK', price: '₹25,000', name: 'Rahul Sharma', contact: '+91 98765 43210', date: '2025-01-01', ownershipType: 'Owner' },
-            { id: 2, location: 'Malad West', propertyType: '1 BHK', price: '₹35,000', name: 'Priya Singh', contact: '+91 91234 56789', date: '2025-06-01', ownershipType: 'Agent' },
-            { id: 3, location: 'Goregaon West', propertyType: '2 BHK', price: '₹60,000', name: 'Arjun Patel', contact: '+91 80123 45678', date: '2025-12-01', ownershipType: 'Owner' },
-            { id: 4, location: 'Kandivali West', propertyType: '1.5 BHK', price: '₹45,000', name: 'Anjali Desai', contact: '+91 79012 34567', date: '2025-08-15', ownershipType: 'Agent' },
-            { id: 5, location: 'Malad West', propertyType: '1 RK', price: '₹28,000', name: 'Suresh Kumar', contact: '+91 90123 45678', date: '2025-03-15', ownershipType: 'Owner' },
-            { id: 6, location: 'Goregaon West', propertyType: '2 BHK', price: '₹65,000', name: 'Kavita Rao', contact: '+91 88765 43210', date: '2025-09-01', ownershipType: 'Agent' },
-            { id: 7, location: 'Kandivali West', propertyType: '1 BHK', price: '₹38,000', name: 'Vikram Joshi', contact: '+91 77654 32109', date: '2025-11-20', ownershipType: 'Owner' },
-            { id: 8, location: 'Malad West', propertyType: '1.5 BHK', price: '₹48,000', name: 'Meera Iyer', contact: '+91 99876 54321', date: '2025-07-10', ownershipType: 'Agent' },
-        ];
-        
         // --- UI Element References ---
         const hamburger = document.querySelector('.hamburger');
         const navLinks = document.querySelector('.nav-links');
@@ -1348,17 +1338,35 @@
         
         // --- Core Functions for View Management ---
 
+        async function fetchAndRenderProperties() {
+            try {
+                const response = await fetch(`${BASE_URL}/all`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                properties = data.rentFlatsList;
+                filterAndRender();
+            } catch (error) {
+                console.error("Error fetching properties:", error);
+                showCustomAlert("Failed to fetch listings. Please try again later.");
+            }
+        }
+
         function renderTable(filteredData) {
             propertiesBody.innerHTML = '';
             filteredData.forEach(property => {
                 const newRow = propertiesBody.insertRow();
+                // Format the date to a simple YYYY-MM-DD string
+                const formattedDate = new Date(property.date).toISOString().substring(0, 10);
+                
                 newRow.innerHTML = `
                     <td>${property.location}</td>
                     <td>${property.propertyType}</td>
                     <td>${property.price}</td>
-                    <td>${property.name}</td>
+                    <td>${property.userName}</td>
                     <td>${property.contact}</td>
-                    <td>${property.date}</td>
+                    <td>${formattedDate}</td>
                     <td>${property.ownershipType}</td>
                     <td class="actions-cell">
                         <button class="action-btn edit-btn" data-id="${property.id}"><i class="fas fa-edit"></i></button>
@@ -1373,13 +1381,16 @@
             filteredData.forEach(property => {
                 const card = document.createElement('div');
                 card.className = 'card-item';
+                // Format the date to a simple YYYY-MM-DD string
+                const formattedDate = new Date(property.date).toISOString().substring(0, 10);
+                
                 card.innerHTML = `
                     <div class="card-row"><span class="card-label">Location:</span> <span class="card-value">${property.location}</span></div>
                     <div class="card-row"><span class="card-label">Type:</span> <span class="card-value">${property.propertyType}</span></div>
                     <div class="card-row"><span class="card-label">Price:</span> <span class="card-value">${property.price}</span></div>
-                    <div class="card-row"><span class="card-label">Contact Person:</span> <span class="card-value">${property.name}</span></div>
+                    <div class="card-row"><span class="card-label">Contact Person:</span> <span class="card-value">${property.userName}</span></div>
                     <div class="card-row"><span class="card-label">Contact:</span> <span class="card-value">${property.contact}</span></div>
-                    <div class="card-row"><span class="card-label">Date:</span> <span class="card-value">${property.date}</span></div>
+                    <div class="card-row"><span class="card-label">Date:</span> <span class="card-value">${formattedDate}</span></div>
                     <div class="card-row"><span class="card-label">Ownership:</span> <span class="card-value">${property.ownershipType}</span></div>
                     <div class="card-actions actions-cell">
                         <button class="action-btn edit-btn" data-id="${property.id}"><i class="fas fa-edit"></i></button>
@@ -1410,7 +1421,7 @@
                         }
                     }
                 }
-                if (filters.mobile && property.contact.indexOf(filters.mobile.value) === -1) isMatch = false;
+                if (filters.mobile && property.contact.toString().indexOf(filters.mobile.value) === -1) isMatch = false;
                 return isMatch;
             });
 
@@ -1439,7 +1450,7 @@
                         }
                     }
                 }
-                if (filters.mobile && property.contact.indexOf(filters.mobile.value) === -1) isMatch = false;
+                if (filters.mobile && property.contact.toString().indexOf(filters.mobile.value) === -1) isMatch = false;
                 return isMatch;
             });
             
@@ -1483,12 +1494,12 @@
         overlay.addEventListener('click', closePanel);
 
         // Delegation for Edit and Delete buttons
-        document.querySelector('.listings-section').addEventListener('click', (e) => {
+        document.querySelector('.listings-section').addEventListener('click', async (e) => {
             const editBtn = e.target.closest('.edit-btn');
             const deleteBtn = e.target.closest('.delete-btn');
             
             if (editBtn) {
-                const propertyId = parseInt(editBtn.dataset.id);
+                const propertyId = editBtn.dataset.id;
                 const property = properties.find(p => p.id === propertyId);
                 if (property) {
                     propertyPanelTitle.textContent = 'Edit Property';
@@ -1497,25 +1508,36 @@
                     document.getElementById('propertyLocation').value = property.location;
                     document.getElementById('propertyType').value = property.propertyType;
                     document.getElementById('propertyPrice').value = property.price;
-                    document.getElementById('propertyName').value = property.name;
+                    document.getElementById('propertyName').value = property.userName;
                     document.getElementById('propertyContact').value = property.contact;
                     document.getElementById('propertyDate').value = property.date;
                     document.getElementById('propertyOwnership').value = property.ownershipType;
                     openPanel();
                 }
             } else if (deleteBtn) {
-                const propertyId = parseInt(deleteBtn.dataset.id);
-                showCustomConfirm('Are you sure you want to delete this property?', (confirmed) => {
+                const propertyId = deleteBtn.dataset.id;
+                showCustomConfirm('Are you sure you want to delete this property?', async (confirmed) => {
                     if (confirmed) {
-                        properties = properties.filter(p => p.id !== propertyId);
-                        filterAndRender();
-                        showCustomAlert('Property deleted successfully!');
+                        try {
+                            const response = await fetch(`${BASE_URL}/delete/${propertyId}`, {
+                                method: 'DELETE'
+                            });
+                            if (!response.ok) {
+                                const errorData = await response.json();
+                                throw new Error(errorData.message || `Failed with status: ${response.status}`);
+                            }
+                            await fetchAndRenderProperties();
+                            showCustomAlert('Property deleted successfully!');
+                        } catch (error) {
+                            console.error("Error deleting property:", error);
+                            showCustomAlert(error.message || "Failed to delete property.");
+                        }
                     }
                 });
             }
         });
 
-        propertyForm.addEventListener('submit', (e) => {
+        propertyForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = {
                 location: document.getElementById('propertyLocation').value,
@@ -1528,20 +1550,42 @@
             };
 
             const propertyId = propertyIdInput.value;
+            let endpoint, method;
+
             if (propertyId === '') {
-                const newId = properties.length > 0 ? Math.max(...properties.map(p => p.id)) + 1 : 1;
-                properties.push({ ...formData, id: newId });
-                showCustomAlert('New property added successfully!');
+                endpoint = `${BASE_URL}/create`;
+                method = 'POST';
             } else {
-                const index = properties.findIndex(p => p.id === parseInt(propertyId));
-                if (index !== -1) {
-                    properties[index] = { ...formData, id: parseInt(propertyId) };
-                    showCustomAlert('Property updated successfully!');
-                }
+                endpoint = `${BASE_URL}/update/${propertyId}`;
+                method = 'PUT';
             }
 
-            filterAndRender();
-            closePanel();
+            try {
+                const response = await fetch(endpoint, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `Failed with status: ${response.status}`);
+                }
+
+                if (propertyId === '') {
+                    showCustomAlert('New property added successfully!');
+                } else {
+                    showCustomAlert('Property updated successfully!');
+                }
+                
+                await fetchAndRenderProperties();
+                closePanel();
+            } catch (error) {
+                console.error("Error submitting form:", error);
+                showCustomAlert(error.message || "An unexpected error occurred. Please try again.");
+            }
         });
 
         dropdowns.forEach(dropdown => {
@@ -1646,7 +1690,9 @@
         const mediaQuery = window.matchMedia("(orientation: portrait)");
         mediaQuery.addEventListener("change", filterAndRender);
         window.addEventListener('resize', filterAndRender);
-        filterAndRender();
+        
+        // Initial fetch and render of data from the database
+        fetchAndRenderProperties();
     });
 </script>
 
