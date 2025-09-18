@@ -6,21 +6,21 @@ import {
     deleteSellListingById 
 } from "../controllers/sellController.js";
 // Comment out or remove these imports for now
-// import { verifyAccessToken } from "../middleware/userAuth.js";
-// import { checkAdminNumber } from "../middleware/checkAdminNumber.js";
+import { verifyAccessToken } from "../middleware/userAuth.js";
+import { checkAdminNumber } from "../middleware/checkAdminNumber.js";
 
 const router = express.Router();
 
-router.post("/create", createSellListing);
+router.post("/create", verifyAccessToken, checkAdminNumber, createSellListing);
 // route 1: create sell listing
 
-router.get("/all", getAllSellListings);
+router.get("/all", verifyAccessToken, checkAdminNumber, getAllSellListings);
 // route 2: get all sell listings
 
-router.put("/update/:id", updateSellListingById);
+router.put("/update/:id", verifyAccessToken, checkAdminNumber, updateSellListingById);
 // route 3: update a single sell listing by ID
 
-router.delete("/delete/:id", deleteSellListingById);
+router.delete("/delete/:id", verifyAccessToken, checkAdminNumber, deleteSellListingById);
 // route 4: delete a single sell listing by ID
 
 export default router;

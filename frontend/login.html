@@ -319,7 +319,7 @@
         const data = await response.json();
 
         if (response.ok && data.token) {
-          sessionStorage.setItem("token", data.token);
+          localStorage.setItem("token", data.token);
           showCustomPopup("Admin Logged-in successfully!", "Success", () => {
             window.location.href = "../frontend/admin-dashboard.html";
           });

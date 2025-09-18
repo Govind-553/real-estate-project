@@ -1008,7 +1008,7 @@
     </div>
     
     <ul class="nav-links">
-        <li><a href="../frontend/admin.html">Dashboard</a></li>
+        <li><a href="../frontend/admin-dashboard.html">Dashboard</a></li>
     </ul>
 
     <div id="propertyPanel" class="side-panel">
@@ -1548,11 +1548,17 @@
             const propertyId = propertyIdInput.value;
             try {
                 if (propertyId === '') {
+                    const accessToken = localStorage.getItem('token');
+                    if (!accessToken) {
+                      alert('Not authenticated. Please log in as admin.');
+                      return;
+                    }
                     // Create new property
                     const response = await fetch(`${BASE_URL}/create`, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'authorization': `Bearer ${accessToken}`
                         },
                         body: JSON.stringify(formData)
                     });
@@ -1579,7 +1585,7 @@
                 closePanel();
             } catch (error) {
                 console.error("Error submitting form:", error);
-                showCustomAlert("An error occurred. Please try again.");
+                showCustomAlert("An error occurred. Please try again." + error);
             }
         });
 
@@ -1690,6 +1696,5 @@
         fetchAndRenderProperties();
     });
 </script>
-
 </body>
 </html>
