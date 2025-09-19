@@ -51,11 +51,18 @@ export const getAllSellListings = async (req, res) => {
     try {
         const listings = await SellFlat.find().lean();
 
-        const formattedListings = listings.map(listing => ({
-            ...listing,
-            id: listing._id.toString(), // Add id for frontend logic
-            price: `₹${new Intl.NumberFormat('en-IN').format(listing.price)}`
-        }));
+        const formattedListings = listings.map(listing => {
+            // ✅ Defensive check for price
+            const formattedPrice = (typeof listing.price === 'number' && !isNaN(listing.price))
+                ? `₹${new Intl.NumberFormat('en-IN').format(listing.price)}`
+                : "Price on request"; // Provide a default value for invalid prices
+
+            return {
+                ...listing,
+                id: listing._id.toString(),
+                price: formattedPrice // Use the safely formatted price
+            };
+        });
 
         res.status(200).json({
             message: "All the flats for sale are listed below.",
