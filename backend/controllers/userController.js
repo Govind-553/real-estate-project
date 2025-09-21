@@ -197,41 +197,45 @@ export const resetPassword = async (req, res) => {
 export const adminLogin = async (req, res) => {
   try {
     const { mobileNumber, password } = req.body;
+    try {
+        // Check if admin exists
+        const user = await User.findOne({ mobileNumber });
+        if (!user) {
+          return res.status(400).json({ message: "Admin not found" });
 
-    // simple check for admin (extend as per your requirement)
-    if (mobileNumber !== process.env.ADMIN_MOBILE) {
-      return res.status(403).json({
-        status: "failed",
-        message: "Unauthorized admin",
-      });
+        }
+    
+        //checks is the user have admin login.
+        const adminNumber = process.env.ADMIN_NUMBER;
+        const phoneNumber = user.mobileNumber;
+        if (String(phoneNumber) !== String(adminNumber)) {
+          return res.status(403).json({
+            message:"Access denied, only admin can access."
+          })
+        }
+    
+        // Compare password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+          return res.status(400).json({ message: "Invalid password" });
+        }
+    
+        // If login is successful, return a token
+        res.status(200).json({
+            status: 'success',
+            message: 'Admin logged in successfully',
+            token: generateAccessToken(user.mobileNumber),
+            data: {
+                fullName:user.fullName,
+                mobileNumber: user.mobileNumber
+            }
+        });
+    } catch (error) {
+        console.error("Login Error:", error);
+        res.status(500).json({ message: "Server error: " + error.message });
     }
+}
 
-    if (password !== process.env.ADMIN_PASSWORD) {
-      return res.status(400).json({
-        status: "failed",
-        message: "Invalid credentials",
-      });
-    }
-
-    const token = jwt.sign(
-      { role: "admin", mobileNumber },
-      process.env.JWT_ACCESS_TOKEN_SECRET,
-      { expiresIn: "2h" }
-    );
-
-    res.status(200).json({
-      status: "success",
-      message: "Admin login successful",
-      token,
-    });
-  } catch (error) {
-    console.error("Error in adminLogin:", error.message);
-    res.status(500).json({
-      status: "failed",
-      message: "Server error",
-    });
-  }
-};
 
 /**
  * Logout

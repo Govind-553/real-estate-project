@@ -1,7 +1,9 @@
 // Import required packages
 import express from "express";
 const router = express.Router(); 
-import {registerUser, forgotPassword, loginUser, resetPassword, adminLogin, logout }  from "../controllers/userController.js";
+import { verifyAccessToken } from "../middleware/userAuth.js";
+import { checkAdminNumber } from "../middleware/checkAdminNumber.js";
+import { registerUser, forgotPassword, loginUser, resetPassword, adminLogin, logout, getAllUsers }  from "../controllers/userController.js";
 
 // Import the User model
 import User from "../models/User.js";
@@ -25,15 +27,7 @@ router.post("/admin-login", adminLogin);
 
 
 // Route 7 - Get all users
-router.get('/all', async (req, res) => {
-    try {
-        const users = await User.find();
-        res.json(users);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
-    }
-});
+router.get('/all-users', verifyAccessToken, checkAdminNumber, getAllUsers);
 
 // Route 8 - Get user by contact
 router.get('/contact/:mobileNumber', async (req, res) => {

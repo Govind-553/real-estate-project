@@ -1,80 +1,87 @@
 import RentFlat from "../models/rentflats.js";
-import User from "../models/User.js"; 
 
 // Helper function to sanitize and parse the price string
 const parsePrice = (priceString) => {
-    // Remove all non-numeric characters except the decimal point
+    if (typeof priceString !== 'string') return null;
     const numericString = priceString.replace(/[^0-9.]/g, '');
     return parseFloat(numericString);
 };
 
-// New helper function to clean the mobile number string
+// Helper function to clean the mobile number string
 const cleanMobileNumber = (mobileString) => {
-    // It returns the number as a string of digits
+    if (typeof mobileString !== 'string') return '';
     return mobileString.replace(/\D/g, '');
 };
 
-// Route 1 Create a new rent listing
+// Route 1: Create a new rent listing
 export const createRentListing = async (req, res) => {
-    const { contact, location, propertyType, price, name, date, ownershipType } = req.body || {};
+    // ✅ CORRECTED: Destructure tenantType instead of ownershipType
+    const { contact, location, propertyType, price, name, date, tenantType } = req.body || {};
 
-    try {
-        if (!contact || !location || !propertyType || !price || !name || !date || !ownershipType) {
-            return res.status(400).json({ message: "All required fields must be provided." });
-        }
+    try {
+        // ✅ CORRECTED: Validate for tenantType
+        if (!contact || !location || !propertyType || !price || !name || !date || !tenantType) {
+            return res.status(400).json({ message: "All required fields must be provided." });
+        }
         
-        // Sanitize the mobile number string to a 10-digit string
         const sanitizedContact = cleanMobileNumber(contact);
 
-        const newListing = new RentFlat({
-            location,
+        const newListing = new RentFlat({
+            location,
             propertyType,
-            price: parsePrice(price),
-            contact: sanitizedContact,
+            price: parsePrice(price),
+            contact: sanitizedContact,
             userName: name,
             date,
-            ownershipType
-        });
+            tenantType // ✅ CORRECTED: Save tenantType
+        });
 
-        const savedListing = await newListing.save();
+        const savedListing = await newListing.save();
 
-        res.status(201).json({
-            message: "New flat for rent is listed successfully.",
-            listing: savedListing,
-        });
+        res.status(201).json({
+            message: "New flat for rent is listed successfully.",
+            listing: savedListing,
+        });
 
-    } catch (error) {
-        console.error("Error creating rent listing:", error.message);
-        res.status(500).json({ message: "Server error while creating rent listing." });
-    }
+    } catch (error) {
+        console.error("Error creating rent listing:", error.message);
+        res.status(500).json({ message: "Server error while creating rent listing." });
+    }
 };
 
-// Route 2 Get all rent listings
+// Route 2: Get all rent listings
 export const getAllRentListings = async (req, res) => {
-    try {
-        const listings = await RentFlat.find().lean();
-        
-        const formattedListings = listings.map(listing => ({
-            ...listing,
-            id: listing._id.toString(),
-            price: `₹${new Intl.NumberFormat('en-IN').format(listing.price)}`
-        }));
+    try {
+        const listings = await RentFlat.find().lean();
         
-        res.status(200).json({
-            message: "All the flats for rent are listed below.",
-            count: formattedListings.length,
-            rentFlatsList: formattedListings,
-        });
-    } catch (error) {
-        console.error("Error fetching listings:", error.message);
-        res.status(500).json({ message: "Server error while fetching listings." });
-    }
+        const formattedListings = listings.map(listing => {
+            const formattedPrice = (typeof listing.price === 'number' && !isNaN(listing.price))
+                ? `₹${new Intl.NumberFormat('en-IN').format(listing.price)}`
+                : "N/A";
+
+            return {
+                ...listing,
+                id: listing._id.toString(),
+                price: formattedPrice
+            };
+        });
+        
+        res.status(200).json({
+            message: "All the flats for rent are listed below.",
+            count: formattedListings.length,
+            rentFlatsList: formattedListings,
+        });
+    } catch (error) {
+        console.error("Error fetching listings:", error.message);
+        res.status(500).json({ message: "Server error while fetching listings." });
+    }
 };
 
-// Route 3 Update a rent listing by its ID
+// Route 3: Update a rent listing by its ID
 export const updateRentListingById = async (req, res) => {
     const { id } = req.params; 
-    const { location, propertyType, price, name, contact, date, ownershipType } = req.body || {};
+    // ✅ CORRECTED: Destructure tenantType
+    const { location, propertyType, price, name, contact, date, tenantType } = req.body || {};
 
     try {
         const update = {
@@ -82,9 +89,9 @@ export const updateRentListingById = async (req, res) => {
             propertyType,
             price: parsePrice(price),
             userName: name,
-            contact: cleanMobileNumber(contact), // Sanitize here as well
+            contact: cleanMobileNumber(contact),
             date,
-            ownershipType
+            tenantType // ✅ CORRECTED: Update tenantType
         };
 
         const result = await RentFlat.findByIdAndUpdate(id, { $set: update }, { new: true });
@@ -103,8 +110,7 @@ export const updateRentListingById = async (req, res) => {
     }
 };
 
-
-// Route 4 Delete a rent listing by its ID
+// Route 4: Delete a rent listing by its ID
 export const deleteRentListingById = async (req, res) => {
     const { id } = req.params;
 

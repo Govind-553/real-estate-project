@@ -887,12 +887,12 @@
     </div>
     <div class="panel-content">
         <label for="profileName">Name:</label>
-        <input type="text" id="profileName" value="DSA Enterprise Admin" disabled>
+        <input type="text" id="profileName" readonly>
         <label for="profileMobile">Mobile Number:</label>
-        <input type="text" id="profileMobile" value="+91 9876543210" disabled>
+        <input type="text" id="profileMobile" readonly>
         <label for="profilePassword">Password:</label>
         <div class="password-container">
-            <input type="password" id="profilePassword" value="Admin@25" disabled>
+            <input type="password" id="profilePassword" value="*******" disabled>
             <i class="fas fa-eye-slash" id="togglePassword"></i>
         </div>
         <button id="logoutBtn">Logout</button>
@@ -969,15 +969,6 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // --- Initial State & Data ---
-    const usersData = [
-        { name: "Rahul Sharma", contact: "9876543210", date: "2025-01-01", type: "Owner", status: "Active" },
-        { name: "Priya Singh", contact: "9123456789", date: "2025-06-01", type: "Agent", status: "Inactive" },
-        { name: "Arjun Patel", contact: "8012345678", date: "2025-02-11", type: "Owner", status: "Active" },
-        { name: "Anjali Desai", contact: "7901234567", date: "2025-03-20", type: "Agent", status: "Active" },
-        { name: "Vikram Joshi", contact: "7765432109", date: "2025-04-05", type: "Owner", status: "Inactive" },
-        { name: "Meera Iyer", contact: "9987654321", date: "2025-07-18", type: "Agent", status: "Active" },
-        { name: "Suresh Kumar", contact: "9012345678", date: "2025-08-22", type: "Owner", status: "Active" }
-    ];
 
     // --- DOM Element Selectors ---
     const usersTable = document.getElementById('usersTable');
@@ -1001,8 +992,42 @@ document.addEventListener('DOMContentLoaded', function() {
     const togglePassword = document.getElementById('togglePassword');
     const profilePasswordInput = document.getElementById('profilePassword');
     const logoutBtn = document.getElementById('logoutBtn');
+    const userData = JSON.parse(localStorage.getItem("admin"));
+    let allusers = [];
+
+  if (userData) {
+    document.getElementById("profileName").value = userData.fullName;
+    document.getElementById("profileMobile").value = userData.mobileNumber;
+    // Password field can be left blank or masked (don’t store passwords in frontend!)
+  }
 
     // --- Core Functions ---
+
+    // --- Fetch users from API ---
+async function fetchUsers() {
+    try {
+        const token = localStorage.getItem("token"); // if JWT is required
+        const response = await fetch("http://localhost:3000/api/users/all-users", {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}` // send JWT if backend requires
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch users");
+        }
+
+        allusers = await response.json();
+        renderTable(allusers); // Pass users to your table renderer
+        updateCounters(allusers); // Pass fresh users to counters
+    } catch (error) {
+        console.error("Error fetching users:", error);
+        alert("Error fetching users. Please try again." + error.message);
+        usersBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Error loading users.</td></tr>`;
+    }
+}
+
     function renderTable(data) {
         usersBody.innerHTML = '';
         if (data.length === 0) {
@@ -1010,26 +1035,32 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         data.forEach((user) => {
+            const statusText = user.status ? user.status : "Unknown";
             const statusClass = `status-${user.status.toLowerCase()}`;
+            //const registrationDate = (user.registrationDate || "N/A").toLocaleDateString();
             const row = document.createElement('tr');
-            row.innerHTML = `
-                <td data-label="Name">${user.name}</td>
-                <td data-label="Contact">+91 ${user.contact}</td>
-                <td data-label="Date Joined">${user.date}</td>
-                <td data-label="User Type">${user.type}</td>
-                <td data-label="Status"><span class="${statusClass}">${user.status}</span></td>
-            `;
+            row.innerHTML =  `
+        <td data-label="Name">${user.fullName || "N/A"}</td>
+        <td data-label="Contact">+91 ${user.mobileNumber || "N/A"}</td>
+        <td data-label="Date Joined">${
+      user.registrationDate
+        ? new Date(user.registrationDate).toLocaleDateString()
+        : "N/A"
+  }</td>
+        <td data-label="User Type">${user.type || "N/A"}</td>
+        <td data-label="Status"><span class="${statusClass}">${statusText}</span></td>
+    `;
             usersBody.appendChild(row);
         });
-        updateCounters();
+        updateCounters(data);
     }
     
-    function updateCounters() {
-        document.getElementById('totalUsers').textContent = usersData.length;
-        document.getElementById('agentUsers').textContent = usersData.filter(u => u.type === 'Agent').length;
-        document.getElementById('ownerUsers').textContent = usersData.filter(u => u.type === 'Owner').length;
-        document.getElementById('activeUsers').textContent = usersData.filter(u => u.status === 'Active').length;
-        document.getElementById('inactiveUsers').textContent = usersData.filter(u => u.status === 'Inactive').length;
+    function updateCounters(data) {
+        document.getElementById('totalUsers').textContent = data.length;
+        document.getElementById('agentUsers').textContent = data.filter(u => u.type === 'Agent').length;
+        document.getElementById('ownerUsers').textContent = data.filter(u => u.type === 'Owner').length;
+        document.getElementById('activeUsers').textContent = data.filter(u => u.status === 'Active').length;
+        document.getElementById('inactiveUsers').textContent = data.filter(u => u.status === 'Inactive').length;
     }
     
     function checkOrientation() {
@@ -1067,28 +1098,31 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Logout Button
-    logoutBtn.addEventListener('click', () => {
-        window.location.href = '../frontend/index.html';
-    });
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("admin");
+        window.location.href = "login.html"; // redirect to login page
+});
 
     // --- Filtering Logic ---
     let currentFilters = { mobile: '', status: '' };
 
     function filterAndRender() {
-        let filteredData = [...usersData];
+        let filteredData = [...allusers];
 
         if (currentFilters.mobile) {
-            filteredData = filteredData.filter(user => user.contact.includes(currentFilters.mobile));
+            filteredData = filteredData.filter(user => String(user.mobileNumber).includes(currentFilters.mobile));
         }
         if (currentFilters.status) {
-            filteredData = filteredData.filter(user => user.status.toLowerCase() === currentFilters.status);
+            filteredData = filteredData.filter(user => user.status.toLowerCase() === currentFilters.status.toLowerCase());
         }
         
         renderTable(filteredData);
+        updateCounters(filteredData);
     }
     
     mobileSearchInput.addEventListener('input', (e) => {
-        currentFilters.mobile = e.target.value;
+        currentFilters.mobile = e.target.value.trim();
         filterAndRender();
     });
     
@@ -1111,7 +1145,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // --- Initial Load ---
-    renderTable(usersData); // Render the initial table
+    fetchUsers(); // Render the initial table
     checkOrientation(); // Initial check for mobile view
     window.addEventListener('resize', checkOrientation); // Re-check on window resize
 });
