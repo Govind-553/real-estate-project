@@ -17,7 +17,7 @@ const app = express();  // Initialize Express app
 
 app.use(cors());
 app.use(express.json());
-app.use(cookieParser()); // Optional if you're handling cookies
+app.use(cookieParser()); 
 
 // Use routes
 app.use('/api/users', userRoutes);
