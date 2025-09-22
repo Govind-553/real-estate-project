@@ -688,6 +688,138 @@
         font-size: 0.875rem;
         background: transparent;
     }
+
+    /* --- Side Panel Styles --- */
+        .side-panel {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            right: 0;
+            top: 0;
+            background: #fff;
+            overflow-x: hidden;
+            transition: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: -2px 0 15px rgba(0,0,0,0.2);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: #fff;
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .panel-content {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        
+        .panel-content form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .panel-content label {
+            font-weight: 500;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        .panel-content input, .panel-content select {
+            padding: 12px;
+            font-size: 1rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+        
+        .panel-content input:focus, .panel-content select:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+
+        .password-container {
+            position: relative;
+        }
+
+        .password-container .fa-eye, .password-container .fa-eye-slash {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #888;
+        }
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+
+        .button-row button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        #logoutBtn {
+            width: 100%;
+            margin-top: 1.5rem;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 8px;
+            padding: 12px;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            cursor: pointer;
+        }
+        #logoutBtn:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* --- Overlay for background dim --- */
+        .overlay {
+            position: fixed;
+            display: none;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1500;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+
     @media (max-width: 768px) {
         .footer {
             padding: 2rem 1rem 1rem;
@@ -724,17 +856,20 @@
 </head>
 <body>
 <nav class="navbar">
-    <div class="logo">
-        <a href="../frontend/index.html">
-            <img src="img/DSA.png" alt="Logo">
-            <span>DSA Enterprise</span>
-        </a>
-    </div>
+     <div class="logo">
+  <a onclick="history.back()">
+    <i class="fas fa-arrow-left"></i>
+  </a>
+  <a>
+    <img src="img/DSA.png" alt="Logo">
+    <span>DSA Enterprise</span>
+  </a>
+</div>
         
     <ul class="nav-links">
         <li><a href="#home">Home</a></li>
         <li><a href="../frontend/sellProperties.html">Sell Properties</a></li>
-        <li><a href=""><i class="fas fa-user-circle fa-xl"></i></a></li>
+        <li><a href=""id="profileIcon"><i class="fas fa-user-circle fa-xl"></i></a></li>
     </ul>
         
     <div class="hamburger">
@@ -743,6 +878,22 @@
         <span></span>
     </div>
 </nav>
+
+<div id="profilePanel" class="side-panel">
+    <div class="panel-header">
+        <span>My Profile</span>
+        <button class="close-btn" id="closeProfileBtn">&times;</button>
+    </div>
+    <div class="panel-content">
+        <label for="profileName">Name:</label>
+        <input type="text" id="profileName" readonly>
+        <label for="profileMobile">Mobile Number:</label>
+        <input type="text" id="profileMobile" readonly>
+        <button id="logoutBtn">Logout</button>
+    </div>
+</div>
+
+<div id="overlay" class="overlay"></div>
 
 <section class="search-section" id="home">
     <div class="search-container">
@@ -1005,6 +1156,53 @@
         const tableMessage = document.getElementById('tableMessage');
         const priceInput = document.getElementById('priceInput');
         const propertiesTable = document.getElementById('propertiesTable');
+        const overlay = document.getElementById('overlay');
+        const togglePassword = document.getElementById('togglePassword');
+    const profilePasswordInput = document.getElementById('profilePassword');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const userData = JSON.parse(localStorage.getItem("admin"));
+    
+    // Panels
+    const profilePanel = document.getElementById('profilePanel');
+
+    // Panel Triggers
+    const profileIcon = document.getElementById('profileIcon');
+    
+    // Panel Close Buttons
+    const closeProfileBtn = document.getElementById('closeProfileBtn');
+
+    // --- Panel Management ---
+    function openPanel(panel) {
+        panel.style.width = '350px';
+        overlay.classList.add('show');
+    }
+
+    function closeAllPanels() {
+        profilePanel.style.width = '0';
+        overlay.classList.remove('show');
+    }
+
+    // --- Event Handlers ---
+    profileIcon.addEventListener('click', (e) => { e.preventDefault(); openPanel(profilePanel); });
+    
+    closeProfileBtn.addEventListener('click', closeAllPanels);
+    overlay.addEventListener('click', closeAllPanels);
+    
+    // Toggle Password Visibility
+    togglePassword.addEventListener('click', () => {
+        const type = profilePasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        profilePasswordInput.setAttribute('type', type);
+        togglePassword.classList.toggle('fa-eye');
+        togglePassword.classList.toggle('fa-eye-slash');
+    });
+
+    // Logout Button
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("admin");
+        window.location.href = "login-register.html"; // redirect to login page
+});
+
 
         function hideTable() {
             tableContainer.classList.add('hidden');
