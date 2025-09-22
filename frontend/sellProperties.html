@@ -788,20 +788,6 @@
                 </div>
             </div>
 
-            <div class="search-group">
-                <label class="search-label">Tenant</label>
-                <div class="dropdown" id="tenantType">
-                    <div class="dropdown-btn">
-                        <span>Select Choice</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="dropdown-content">
-                        <div class="dropdown-option" data-value="family">Family</div>
-                        <div class="dropdown-option" data-value="bachelor">Bachelor</div>
-                    </div>
-                </div>
-            </div>
-
             <button type="button" class="search-btn" id="searchBtn">
                 <i class="fas fa-search"></i>
                 Search
@@ -822,101 +808,21 @@
         <h2 class="property-title">Available Properties</h2>
             
         <div id="tableContainer" class="property-table-container hidden">
-            <table class="property-table" id="propertiesTable">
-                <thead>
+            <table class="property-table">
+                <thead id="propertiesTable">
                     <tr>
                         <th>Location</th>
                         <th>Property Type</th>
                         <th>Price</th>
                         <th>Name</th>
                         <th>Contact</th>
-                        <th>Tenant Choice</th>
                         <th>Date</th>
                         <th>Ownership Type</th>
                     </tr>
                 </thead>
                 <tbody id="propertiesBody">
-                    <tr data-location="kandivali west" data-type="1rk" data-price="25000" data-tenant="family">
-                        <td data-label="Location">Kandivali West</td>
-                        <td data-label="Property Type">1 RK</td>
-                        <td data-label="Price">₹25,000</td>
-                        <td data-label="Name">Rahul Sharma</td>
-                        <td data-label="Contact">+91 98765 43210</td>
-                        <td data-label="Tenant Choice">Family</td>
-                        <td data-label="Date">2025-01-01</td>
-                        <td data-label="Ownership Type">Owner</td>
-                    </tr>
-                    <tr data-location="malad west" data-type="1bhk" data-price="35000" data-tenant="family">
-                        <td data-label="Location">Malad West</td>
-                        <td data-label="Property Type">1 BHK</td>
-                        <td data-label="Price">₹35,000</td>
-                        <td data-label="Name">Priya Singh</td>
-                        <td data-label="Contact">+91 91234 56789</td>
-                        <td data-label="Tenant Choice">Family</td>
-                        <td data-label="Date">2025-06-01</td>
-                        <td data-label="Ownership Type">Agent</td>
-                    </tr>
-                    <tr data-location="goregaon west" data-type="2bhk" data-price="60000" data-tenant="family">
-                        <td data-label="Location">Goregaon West</td>
-                        <td data-label="Property Type">2 BHK</td>
-                        <td data-label="Price">₹60,000</td>
-                        <td data-label="Name">Arjun Patel</td>
-                        <td data-label="Contact">+91 80123 45678</td>
-                        <td data-label="Tenant Choice">Family</td>
-                        <td data-label="Date">2025-12-01</td>
-                        <td data-label="Ownership Type">Owner</td>
-                    </tr>
-                    <tr data-location="kandivali west" data-type="1.5bhk" data-price="45000" data-tenant="bachelor">
-                        <td data-label="Location">Kandivali West</td>
-                        <td data-label="Property Type">1.5 BHK</td>
-                        <td data-label="Price">₹45,000</td>
-                        <td data-label="Name">Anjali Desai</td>
-                        <td data-label="Contact">+91 79012 34567</td>
-                        <td data-label="Tenant Choice">Bachelor</td>
-                        <td data-label="Date">2025-08-15</td>
-                        <td data-label="Ownership Type">Agent</td>
-                    </tr>
-                    <tr data-location="malad west" data-type="1rk" data-price="28000" data-tenant="bachelor">
-                        <td data-label="Location">Malad West</td>
-                        <td data-label="Property Type">1 RK</td>
-                        <td data-label="Price">₹28,000</td>
-                        <td data-label="Name">Suresh Kumar</td>
-                        <td data-label="Contact">+91 90123 45678</td>
-                        <td data-label="Tenant Choice">Bachelor</td>
-                        <td data-label="Date">2025-03-15</td>
-                        <td data-label="Ownership Type">Owner</td>
-                    </tr>
-                    <tr data-location="goregaon west" data-type="2bhk" data-price="65000" data-tenant="family">
-                        <td data-label="Location">Goregaon West</td>
-                        <td data-label="Property Type">2 BHK</td>
-                        <td data-label="Price">₹65,000</td>
-                        <td data-label="Name">Kavita Rao</td>
-                        <td data-label="Contact">+91 88765 43210</td>
-                        <td data-label="Tenant Choice">Family</td>
-                        <td data-label="Date">2025-09-01</td>
-                        <td data-label="Ownership Type">Agent</td>
-                    </tr>
-                    <tr data-location="kandivali west" data-type="1bhk" data-price="38000" data-tenant="bachelor">
-                        <td data-label="Location">Kandivali West</td>
-                        <td data-label="Property Type">1 BHK</td>
-                        <td data-label="Price">₹38,000</td>
-                        <td data-label="Name">Vikram Joshi</td>
-                        <td data-label="Contact">+91 77654 32109</td>
-                        <td data-label="Tenant Choice">Bachelor</td>
-                        <td data-label="Date">2025-11-20</td>
-                        <td data-label="Ownership Type">Owner</td>
-                    </tr>
-                    <tr data-location="malad west" data-type="1.5bhk" data-price="48000" data-tenant="family">
-                        <td data-label="Location">Malad West</td>
-                        <td data-label="Property Type">1.5 BHK</td>
-                        <td data-label="Price">₹48,000</td>
-                        <td data-label="Name">Meera Iyer</td>
-                        <td data-label="Contact">+91 99876 54321</td>
-                        <td data-label="Tenant Choice">Family</td>
-                        <td data-label="Date">2025-07-10</td>
-                        <td data-label="Ownership Type">Agent</td>
-                    </tr>
-                </tbody>
+                    <!-- Property rows will be dynamically inserted here -->
+                     </tbody>
             </table>
         </div>
         <div id="tableMessage" class="table-message">
@@ -991,9 +897,10 @@
 </footer>
 
 <script>
-    let filters = {};
 
     document.addEventListener('DOMContentLoaded', function() {
+        let filters = {};
+        let propertiesData = [];
         const hamburger = document.querySelector('.hamburger');
         const navLinks = document.querySelector('.nav-links');
         const dropdowns = document.querySelectorAll('.dropdown');
@@ -1005,11 +912,53 @@
         const tableMessage = document.getElementById('tableMessage');
         const priceInput = document.getElementById('priceInput');
         const propertiesTable = document.getElementById('propertiesTable');
+        const BaseUrl = 'http://localhost:3000/api/sellflats';
 
+                function renderProperties(data) {
+            propertiesBody.innerHTML = "";
+            data.forEach(property => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${property.location || ''}</td>
+                    <td>${property.propertyType || ''}</td>
+                    <td>₹${property.price ? property.price.toLocaleString() : ''}</td>
+                    <td>${property.userName || ''}</td>
+                    <td>${property.contact || ''}</td>
+                    <td>${property.date ? new Date(property.date).toLocaleDateString() : ''}</td>
+                    <td>${property.ownershipType || ''}</td>
+                `;
+                propertiesBody.appendChild(row);
+            });
+        }
+
+async function fetchProperties() {
+    const token = localStorage.getItem("userToken");
+    try {
+        const response = await fetch(`${BaseUrl}/all-public`, { 
+            headers: { 
+                'Content-Type': 'application/json',
+                'authorization': `Bearer ${token}` 
+            } 
+        });
+        if (!response.ok) throw new Error('Failed to fetch properties');
+
+        const result = await response.json();
+        propertiesData = result.data || { "data": [] } || [];
+
+        console.log("Fetched properties:", propertiesData);
+
+    } catch (error) {
+        console.error('Error fetching properties:', error);
+        showTableMessage('Error loading properties. Please try again later.');
+    }
+}
+        
         function hideTable() {
             tableContainer.classList.add('hidden');
             tableMessage.classList.remove('hidden');
         }
+
+        
 
         function showTable() {
             tableContainer.classList.remove('hidden');
@@ -1073,9 +1022,17 @@
         document.addEventListener('click', () => {
             dropdowns.forEach(d => d.classList.remove('active'));
         });
-        
-        searchBtn.addEventListener('click', applyFilters);
-        
+
+        searchBtn.addEventListener('click', () => {
+            applyFilters();
+            if (propertiesData.length > 0) {
+                showTable();
+            } else {
+                hideTable();
+                showTableMessage("No properties found. Please try different filters.");
+            }
+        });
+
         clearAllBtn.addEventListener('click', () => {
             clearAllFilters();
             hideTable();
@@ -1122,7 +1079,6 @@
             switch(filterKey) {
                 case 'location': return 'Select Location';
                 case 'propertyType': return 'Select Property Type';
-                case 'tenantType': return 'Select Choice';
                 default: return 'Select';
             }
         }
@@ -1141,33 +1097,27 @@
             updateSelectedFilters();
         }
 
-        function applyFilters() {
-            const rows = propertiesBody.querySelectorAll('tr');
-            let foundResults = false;
-
+               function applyFilters() {
+            let filteredData = [...propertiesData];
+        
             const filterLocation = filters.location ? filters.location.value.toLowerCase() : '';
             const filterType = filters.propertyType ? filters.propertyType.value.toLowerCase() : '';
-            const filterTenant = filters.tenantType ? filters.tenantType.value.toLowerCase() : '';
             const priceRange = filters.priceInput ? filters.priceInput.value.replace(/[^0-9-]/g, '') : '';
-            
-            let minPrice = -1;
-            let maxPrice = -1;
+        
+            let minPrice = -1, maxPrice = -1;
             if (priceRange.includes('-')) {
                 const parts = priceRange.split('-').map(p => parseInt(p.trim().replace(/,/g, ''), 10));
-                minPrice = parts[0];
-                maxPrice = parts[1];
+                minPrice = parts[0]; maxPrice = parts[1];
             }
-
-            rows.forEach(row => {
-                const rowLocation = row.getAttribute('data-location');
-                const rowType = row.getAttribute('data-type');
-                const rowTenant = row.getAttribute('data-tenant');
-                const rowPrice = parseInt(row.getAttribute('data-price'), 10);
-                
+        
+            filteredData = filteredData.filter(property => {
+                const rowLocation = property.location ? property.location.toLowerCase() : '';
+                const rowType = property.propertyType ? property.propertyType.toLowerCase() : '';
+                const rowPrice = property.price || 0;
+        
                 const matchLocation = !filterLocation || rowLocation.includes(filterLocation);
                 const matchType = !filterType || rowType === filterType;
-                const matchTenant = !filterTenant || rowTenant === filterTenant;
-                
+        
                 let matchPrice = false;
                 if (!priceRange) {
                     matchPrice = true;
@@ -1179,22 +1129,11 @@
                     const singlePrice = parseInt(priceRange.replace(/,/g, ''), 10);
                     matchPrice = (rowPrice === singlePrice);
                 }
-
-                if (matchLocation && matchType && matchTenant && matchPrice) {
-                    row.style.display = '';
-                    foundResults = true;
-                } else {
-                    row.style.display = 'none';
-                }
+        
+                return matchLocation && matchType && matchPrice;
             });
-            
-            if (foundResults) {
-                showTable();
-            } else {
-                hideTable();
-                showTableMessage('No properties found matching your criteria. Please try different filters.');
-            }
         }
+        fetchProperties();
     });
 </script>
 </body>

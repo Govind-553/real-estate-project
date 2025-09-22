@@ -23,4 +23,7 @@ router.put("/update/:id", verifyAccessToken, checkAdminNumber, updateSellListing
 router.delete("/delete/:id", verifyAccessToken, checkAdminNumber, deleteSellListingById);
 // route 4: delete a single sell listing by ID
 
+//Route 5: fetch all sell listings for public access
+router.get("/all-public", getAllSellListings);
+
 export default router;
