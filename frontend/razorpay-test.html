@@ -35,13 +35,13 @@
         const options = {
           key: "rzp_test_ZxNdYbzCa0cpti", 
           subscription_id: data.subscriptionId,
-          name: "Flatmate Platform",
-          description: "Premium Subscription Plan",
+          name: "DSA Enterprise",
+          description: "Subscription Plan",
           handler: function (response) {
             alert("✅ Payment Successful!\nPayment ID: " + response.razorpay_payment_id);
             console.log("Razorpay Response:", response);
           },
-          theme: { color: "#3399cc" },
+          theme: { color: "#0c2db0" },
         };
 
         const rzp = new Razorpay(options);
