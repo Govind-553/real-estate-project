@@ -860,6 +860,11 @@ if (resendOtpLink) {
 
                                 if (response.ok) {
                                     showCustomPopup("✅ " + data.message);
+                                    // Store token in localStorage
+                                    localStorage.setItem("userToken", data.token);
+                                    localStorage.setItem("userName", data.name);
+                                    localStorage.setItem("userContact", data.contact);
+                                    // Redirect to properties page after successful login
                                     window.location.href = "../frontend/sellProperties.html";
                                 } else {
                                     showCustomPopup("❌ " + data.message);

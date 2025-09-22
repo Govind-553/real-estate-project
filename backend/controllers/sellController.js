@@ -42,7 +42,7 @@ export const createSellListing = async (req, res) => {
         });
     } catch (error) {
         console.error("Error creating sell listing:", error.message);
-        res.status(500).json({ message: "Server error while creating sell listing." });
+        res.status(500).json({ message: "Server error while creating sell listing." + error.message });
     }
 };
 
@@ -67,7 +67,7 @@ export const getAllSellListings = async (req, res) => {
         res.status(200).json({
             message: "All the flats for sale are listed below.",
             count: formattedListings.length,
-            sellFlatsList: formattedListings,
+            data: formattedListings,
         });
     } catch (error) {
         console.error("Error fetching sell listings:", error.message);
