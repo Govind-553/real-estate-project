@@ -39,6 +39,7 @@ export const registerUser = async (req, res) => {
             mobileNumber,
             password: hashpassword,
             subscriptionActive: true, // ✅ Give trial by default
+            subscriptionStatus: "Active", // ✅ Keep status in words
             subscriptionExpiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // ✅ 7 days free
         });
 
@@ -49,7 +50,9 @@ export const registerUser = async (req, res) => {
             message: 'User registered successfully (OTP pending)',
             data: {
                 fullName: newUser.fullName,
-                contact: newUser.mobileNumber
+                contact: newUser.mobileNumber,
+                subscriptionStatus: newUser.subscriptionStatus,
+                subscriptionExpiry: newUser.subscriptionExpiry
             }
         });
     } catch (error) {
@@ -91,13 +94,15 @@ export const loginUser = async (req, res) => {
         if (existingUser.subscriptionExpiry && existingUser.subscriptionExpiry < new Date()) {
             subscriptionActive = false;
             existingUser.subscriptionActive = false;
+            existingUser.subscriptionStatus = "Inactive"; // ✅ Keep both in sync
             await existingUser.save();
         }
 
         if (!subscriptionActive) {
             return res.status(403).json({
                 message: "Your trial/subscription has expired. Please subscribe to continue.",
-                subscriptionActive: false
+                subscriptionActive: false,
+                subscriptionStatus: "Inactive"
             });
         }
 
@@ -107,6 +112,7 @@ export const loginUser = async (req, res) => {
             message: 'User logged in successfully',
             userId: existingUser._id,
             subscriptionActive: existingUser.subscriptionActive,
+            subscriptionStatus: existingUser.subscriptionStatus,
             subscriptionExpiry: existingUser.subscriptionExpiry,
             token: generateAccessToken(existingUser.mobileNumber),
         });
