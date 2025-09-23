@@ -1016,11 +1016,11 @@
                                     if (data.status === 'success') {
                                         handleSubscription(mobileNumber); // Using mobile number for subscription
                                     } else {
-                                        showCustomPopup("❌ " + data.message);
+                                        showCustomPopup("❌ " + data.msg);
                                     }
                                 } catch(error) {
                                     console.error("API error:", error);
-                                    showCustomPopup("Error registering user: " + error.message);
+                                    showCustomPopup("Error registering user: " + error.msg);
                                 }
                             },
                             true
