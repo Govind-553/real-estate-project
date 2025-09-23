@@ -22,4 +22,7 @@ router.put("/update/:id", verifyAccessToken, checkAdminNumber, updateRentListing
 router.delete("/delete/:id", verifyAccessToken, checkAdminNumber, deleteRentListingById);
 // route 4: delete a single Rent listing by ID
 
+//Route 5: fetch all rent listings for public access
+router.get("/all-public",verifyAccessToken, getAllRentListings);
+
 export default router;
