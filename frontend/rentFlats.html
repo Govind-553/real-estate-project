@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DSA Enterprise - Rent Properties Admin Panel</title>
+    <link rel="icon" type="image/x-icon" href="img/DSA.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -130,7 +131,7 @@
 
 /* Pop-up Card styles */
 .custom-popup-card {
-    background-color: var(--bg-white);
+    background-color: white;
     padding: 2rem;
     border-radius: 12px;
     box-shadow: var(--shadow);
@@ -287,12 +288,27 @@ document.addEventListener('DOMContentLoaded', function() {
     const okBtn = document.getElementById('okBtn');
     const confirmYesBtn = document.getElementById('confirmYesBtn');
     const confirmNoBtn = document.getElementById('confirmNoBtn');
-    let confirmCallback = null;
-    function showCustomAlert(message) { modalMessage.textContent = message; okBtn.style.display = 'inline-block'; confirmYesBtn.style.display = 'none'; confirmNoBtn.style.display = 'none'; customModal.style.display = 'flex'; }
-    function showCustomConfirm(message, callback) { modalMessage.textContent = message; okBtn.style.display = 'none'; confirmYesBtn.style.display = 'inline-block'; confirmNoBtn.style.display = 'inline-block'; customModal.style.display = 'flex'; confirmCallback = callback; }
-    okBtn.addEventListener('click', () => customModal.style.display = 'none');
-    confirmYesBtn.addEventListener('click', () => { if (confirmCallback) confirmCallback(true); customModal.style.display = 'none'; });
-    confirmNoBtn.addEventListener('click', () => { if (confirmCallback) confirmCallback(false); customModal.style.display = 'none'; });
+    
+    // Unified function to handle both alerts and confirmations
+    function showCustomPopup(message, isConfirm = false, callback = null) {
+        modalMessage.textContent = message;
+        
+        if (isConfirm) {
+            okBtn.style.display = 'none';
+            confirmYesBtn.style.display = 'inline-block';
+            confirmNoBtn.style.display = 'inline-block';
+        } else {
+            okBtn.style.display = 'inline-block';
+            confirmYesBtn.style.display = 'none';
+            confirmNoBtn.style.display = 'none';
+        }
+
+        customModal.style.display = 'flex';
+        
+        okBtn.onclick = () => { customModal.style.display = 'none'; if (callback) callback(true); };
+        confirmYesBtn.onclick = () => { customModal.style.display = 'none'; if (callback) callback(true); };
+        confirmNoBtn.onclick = () => { customModal.style.display = 'none'; if (callback) callback(false); };
+    }
 
     // --- UI Element References ---
     const hamburger = document.querySelector('.hamburger');
@@ -387,7 +403,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         const deleteBtn = e.target.closest('.delete-btn');
         if (deleteBtn) {
-            showCustomPopup('⚠️ Are you sure you want to delete this rental property?', async (confirmed) => {
+            showCustomPopup('⚠️ Are you sure you want to delete this rental property?', true, async (confirmed) => {
                 if (confirmed) {
                     try {
                         const accessToken = localStorage.getItem('token');
@@ -510,63 +526,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     dropdown.querySelector('.dropdown-btn span').textContent = `Select ${filterKey === 'flatType' ? 'Property Type' : 'Location'}`;
                     dropdown.querySelectorAll('.dropdown-option').forEach(opt => opt.classList.remove('selected'));
                 }
-                // Handle text inputs (price, mobile, etc.)
-        const input = document.getElementById(filterKey);
-        if (input && (input.tagName === 'INPUT' || input.tagName === 'TEXTAREA')) {
-            input.value = '';
-        }
-
-        updateSelectedFilters();
-        filterAndRender();
+                const input = document.getElementById(filterKey);
+                if (input && (input.tagName === 'INPUT' || input.tagName === 'TEXTAREA')) {
+                    input.value = '';
+                }
+                updateSelectedFilters();
+                filterAndRender();
             });
         });
     }
 
     fetchAndRenderProperties();
 });
- function showCustomPopup(message, title = "Notification", onOk = null, showClose = false) {
-            const overlay = document.getElementById('custom-popup-overlay');
-            const popupTitle = document.getElementById('popup-title');
-            const popupMessage = document.getElementById('popup-message');
-            const okBtn = document.getElementById('popup-ok-btn');
-            const closeBtn = document.getElementById('popup-close-btn');
-
-            popupTitle.textContent = title;
-            popupMessage.textContent = message;
-
-            closeBtn.style.display = showClose ? 'inline-block' : 'none';
-            okBtn.textContent = (onOk && showClose) ? "Continue" : "OK";
-            closeBtn.textContent = "Discard";
-
-            okBtn.onclick = null;
-            closeBtn.onclick = null;
-
-            okBtn.onclick = () => {
-                if (onOk) {
-                    hideCustomPopup();
-                    onOk();
-                } else {
-                    hideCustomPopup();
-                }
-            };
-
-            closeBtn.onclick = () => {
-                hideCustomPopup();
-                renderLoginForm();
-            };
-
-            overlay.classList.remove('popup-hidden');
-            overlay.classList.add('popup-visible');
-            document.querySelector('.custom-popup-card').style.transform = 'scale(1)';
-        }
-
-        function hideCustomPopup() {
-            const overlay = document.getElementById('custom-popup-overlay');
-            overlay.classList.remove('popup-visible');
-            overlay.classList.add('popup-hidden');
-            document.querySelector('.custom-popup-card').style.transform = 'scale(0.9)';
-        }
-
 </script>
 
 </body>

@@ -469,47 +469,22 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-         /* Responsive adjustments for the side panel's  */
+.side-panel.open {
+    width: 400px; 
+}
 
-/* Medium screens (tablet) */
-@media (min-width: 768px) and (max-width: 1023px) {
-    .side-panel {
-        width: 350px; /* Slightly narrower */
-    }
-    .panel-header {
-        font-size: 1.2rem;
-    }
-    .button-row button {
-        font-size: 0.95rem;
-        padding: 10px;
+/* Media queries for responsiveness (applied to the open state) */
+@media (max-width: 1023px) {
+    .side-panel.open {
+        width: 400px; /* Adjust for medium screens */
     }
 }
 
-/* Small screens (mobile) */
-@media (max-width: 767px) {
-    .side-panel {
-        width: 100%; /* Full width on mobile */
-    }
-    .panel-header {
-        font-size: 1.1rem;
-        padding: 0.8rem 1rem;
-    }
-    .panel-content {
-        padding: 1rem;
-    }
-    .panel-content input,
-    .panel-content select {
-        font-size: 0.95rem;
-        padding: 10px;
-    }
-    .button-row {
-        flex-direction: column; /* Stack buttons */
-    }
-    .button-row button {
-        width: 100%;
+@media (max-width: 425px) {
+    .side-panel.open {
+        width: 100%; /* Full width for mobile screens */
     }
 }
-
         /* --- Overlay for background dim --- */
         .overlay {
             position: fixed;
@@ -639,7 +614,7 @@
             background: transparent;
         }
 
-         .footer-logo {
+        .footer-logo {
             display: flex;
             align-items: center;
             gap: 0.75rem;
@@ -647,7 +622,7 @@
             font-weight: 400;
             margin-bottom: 1rem;
             background: transparent;
-             font-family: "Caprasimo", serif;
+            font-family: "Caprasimo", serif;
             font-style: normal;
         }
 
@@ -819,57 +794,80 @@
             }
         }
 
-         /* Pop-up Overlay styles */
-#custom-popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1001; /* Ensure it's on top of other content */
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-}
+        /* Pop-up Overlay styles */
+        #custom-popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001; /* Ensure it's on top of other content */
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
 
-/* Pop-up Card styles */
-.custom-popup-card {
-    background-color: #fff;
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    width: 90%;
-    max-width: 400px;
-    text-align: center;
-    transform: scale(0.9);
-    transition: transform 0.3s ease;
-}
+        /* Pop-up Card styles */
+        .custom-popup-card {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
 
-/* Hide the pop-up by default */
-.popup-hidden {
-    visibility: hidden;
-    opacity: 0;
-}
+        /* Hide the pop-up by default */
+        .popup-hidden {
+            visibility: hidden;
+            opacity: 0;
+        }
 
-/* Show the pop-up with a smooth animation */
-.popup-visible {
-    visibility: visible;
-    opacity: 1;
-}
+        /* Show the pop-up with a smooth animation */
+        .popup-visible {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .custom-popup-content {
+            margin-bottom: 1.5rem;
+        }
 
-/* Adjust button styles to match your design */
-.custom-popup-buttons {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 1.5rem;
-}
+        /* Adjust button styles to match your design */
+        .custom-popup-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
 
-.custom-popup-buttons .btn {
-    width: 45%; 
-    /* Add any other button styles */
-}
+        .custom-popup-buttons .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+        
+        .btn-primary {
+            background-color: #1e3a8a;
+            color: #fff;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
 
     </style>
 </head>
@@ -907,8 +905,8 @@
                 <p id="popup-message"></p>
             </div>
             <div class="custom-popup-buttons">
-                <button id="popup-ok-btn" class="btn">OK</button>
-                <button id="popup-close-btn" class="btn">Close</button>
+                <button id="popup-ok-btn" class="btn btn-primary">OK</button>
+                <button id="popup-close-btn" class="btn btn-danger">Close</button>
             </div>
         </div>
     </div>
@@ -973,18 +971,18 @@
         
         <div class="data-table-wrapper">
              <table class="data-table" id="usersTable">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Contact</th>
-                        <th>Date Joined</th>
-                        <th>User Type</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="usersBody">
-                    </tbody>
-            </table>
+                 <thead>
+                     <tr>
+                         <th>Name</th>
+                         <th>Contact</th>
+                         <th>Date Joined</th>
+                         <th>User Type</th>
+                         <th>Status</th>
+                     </tr>
+                 </thead>
+                 <tbody id="usersBody">
+                     </tbody>
+             </table>
         </div>
     </section>
 </main>
@@ -1104,38 +1102,81 @@ document.addEventListener('DOMContentLoaded', function() {
     const userData = JSON.parse(localStorage.getItem("admin"));
     let allusers = [];
 
-  if (userData) {
-    document.getElementById("profileName").value = userData.fullName;
-    document.getElementById("profileMobile").value = userData.mobileNumber;
-    // Password field can be left blank or masked (don’t store passwords in frontend!)
-  }
-
     // --- Core Functions ---
+    
+    // Unified Custom Popup Function
+    function showCustomPopup(message, isConfirm = false, callback = null) {
+        const popupOverlay = document.getElementById('custom-popup-overlay');
+        const popupMessage = document.getElementById('popup-message');
+        const popupOkBtn = document.getElementById('popup-ok-btn');
+        const popupCloseBtn = document.getElementById('popup-close-btn');
 
-    // --- Fetch users from API ---
-async function fetchUsers() {
-    try {
-        const token = localStorage.getItem("token"); // if JWT is required
-        const response = await fetch("http://localhost:3000/api/users/all-users", {
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}` // send JWT if backend requires
-            }
-        });
+        popupMessage.textContent = message;
 
-        if (!response.ok) {
-            throw new Error("Failed to fetch users");
+        if (isConfirm) {
+            popupOkBtn.textContent = "Yes";
+            popupOkBtn.classList.remove('btn-primary');
+            popupOkBtn.classList.add('btn-success');
+            popupCloseBtn.style.display = 'inline-block';
+            popupCloseBtn.textContent = "No";
+        } else {
+            popupOkBtn.textContent = "OK";
+            popupOkBtn.classList.add('btn-primary');
+            popupOkBtn.classList.remove('btn-success');
+            popupCloseBtn.style.display = 'none';
         }
 
-        allusers = await response.json();
-        renderTable(allusers); // Pass users to your table renderer
-        updateCounters(allusers); // Pass fresh users to counters
-    } catch (error) {
-        console.error("Error fetching users:", error);
-        showCustomPopup("❌ Error fetching users. Please try again." + error.message);
-        usersBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Error loading users.</td></tr>`;
+        popupOkBtn.onclick = () => {
+            hideCustomPopup();
+            if (callback) callback(true);
+        };
+
+        popupCloseBtn.onclick = () => {
+            hideCustomPopup();
+            if (callback) callback(false);
+        };
+        
+        popupOverlay.classList.remove('popup-hidden');
+        popupOverlay.classList.add('popup-visible');
+        document.querySelector('.custom-popup-card').style.transform = 'scale(1)';
     }
-}
+
+    function hideCustomPopup() {
+        const overlay = document.getElementById('custom-popup-overlay');
+        overlay.classList.remove('popup-visible');
+        overlay.classList.add('popup-hidden');
+        document.querySelector('.custom-popup-card').style.transform = 'scale(0.9)';
+    }
+
+    if (userData) {
+        document.getElementById("profileName").value = userData.fullName;
+        document.getElementById("profileMobile").value = userData.mobileNumber;
+    }
+
+    // --- Fetch users from API ---
+    async function fetchUsers() {
+        try {
+            const token = localStorage.getItem("token"); // if JWT is required
+            const response = await fetch("http://localhost:3000/api/users/all-users", {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}` // send JWT if backend requires
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch users");
+            }
+
+            allusers = await response.json();
+            renderTable(allusers); // Pass users to your table renderer
+            updateCounters(allusers); // Pass fresh users to counters
+        } catch (error) {
+            console.error("Error fetching users:", error);
+            showCustomPopup("❌ Error fetching users. Please try again." + error.message);
+            usersBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Error loading users.</td></tr>`;
+        }
+    }
 
     function renderTable(data) {
         usersBody.innerHTML = '';
@@ -1146,9 +1187,8 @@ async function fetchUsers() {
         data.forEach((user) => {
             const statusText = user.subscriptionStatus ? user.subscriptionStatus : "Unknown";
             const statusClass = `status-${user.subscriptionStatus ? user.subscriptionStatus.toLowerCase() : 'unknown'}`;
-            //const registrationDate = (user.registrationDate || "N/A").toLocaleDateString();
             const row = document.createElement('tr');
-            row.innerHTML =  `
+            row.innerHTML = `
                 <td data-label="Name">${user.fullName || "N/A"}</td>
                 <td data-label="Contact">+91 ${user.mobileNumber || "N/A"}</td>
                 <td data-label="Date Joined">${
@@ -1181,15 +1221,15 @@ async function fetchUsers() {
     }
 
     // --- Panel Management ---
-    function openPanel(panel) {
-        panel.style.width = '350px';
-        overlay.classList.add('show');
-    }
+function openPanel() {
+    profilePanel.classList.add('open');
+    overlay.classList.add('show');
+}
 
-    function closeAllPanels() {
-        profilePanel.style.width = '0';
-        overlay.classList.remove('show');
-    }
+function closeAllPanels() {
+    profilePanel.classList.remove('open');
+    overlay.classList.remove('show');
+}
 
     // --- Event Handlers ---
     hamburger.addEventListener('click', () => navLinks.classList.toggle('active'));
@@ -1211,10 +1251,10 @@ async function fetchUsers() {
         localStorage.removeItem("token");
         localStorage.removeItem("admin");
         window.location.href = "login.html"; // redirect to login page
-});
+    });
 
     // --- Filtering Logic ---
-    let currentFilters = { mobile: '', status: '' };
+    let currentFilters = { mobile: '', subscriptionStatus: '' }; // Changed 'status' to 'subscriptionStatus' to match backend
 
     function filterAndRender() {
         let filteredData = [...allusers];
@@ -1223,7 +1263,7 @@ async function fetchUsers() {
             filteredData = filteredData.filter(user => String(user.mobileNumber).includes(currentFilters.mobile));
         }
         if (currentFilters.subscriptionStatus) {
-            filteredData = filteredData.filter(user => user.subscriptionStatus.toLowerCase() === currentFilters.subscriptionStatus.toLowerCase());
+            filteredData = filteredData.filter(user => user.subscriptionStatus && user.subscriptionStatus.toLowerCase() === currentFilters.subscriptionStatus.toLowerCase());
         }
         
         renderTable(filteredData);
@@ -1253,54 +1293,10 @@ async function fetchUsers() {
       }
     });
 
-    // --- Initial Load ---
     fetchUsers(); // Render the initial table
     checkOrientation(); // Initial check for mobile view
     window.addEventListener('resize', checkOrientation); // Re-check on window resize
 });
- function showCustomPopup(message, title = "Notification", onOk = null, showClose = false) {
-            const overlay = document.getElementById('custom-popup-overlay');
-            const popupTitle = document.getElementById('popup-title');
-            const popupMessage = document.getElementById('popup-message');
-            const okBtn = document.getElementById('popup-ok-btn');
-            const closeBtn = document.getElementById('popup-close-btn');
-
-            popupTitle.textContent = title;
-            popupMessage.textContent = message;
-
-            closeBtn.style.display = showClose ? 'inline-block' : 'none';
-            okBtn.textContent = (onOk && showClose) ? "Continue" : "OK";
-            closeBtn.textContent = "Discard";
-
-            okBtn.onclick = null;
-            closeBtn.onclick = null;
-
-            okBtn.onclick = () => {
-                if (onOk) {
-                    hideCustomPopup();
-                    onOk();
-                } else {
-                    hideCustomPopup();
-                }
-            };
-
-            closeBtn.onclick = () => {
-                hideCustomPopup();
-                renderLoginForm();
-            };
-
-            overlay.classList.remove('popup-hidden');
-            overlay.classList.add('popup-visible');
-            document.querySelector('.custom-popup-card').style.transform = 'scale(1)';
-        }
-
-        function hideCustomPopup() {
-            const overlay = document.getElementById('custom-popup-overlay');
-            overlay.classList.remove('popup-visible');
-            overlay.classList.add('popup-hidden');
-            document.querySelector('.custom-popup-card').style.transform = 'scale(0.9)';
-        }
-
 </script>
 
 </body>

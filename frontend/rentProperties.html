@@ -804,6 +804,23 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
+.side-panel.open {
+    width: 400px; 
+}
+
+/* Media queries for responsiveness (applied to the open state) */
+@media (max-width: 1023px) {
+    .side-panel.open {
+        width: 400px; /* Adjust for medium screens */
+    }
+}
+
+@media (max-width: 425px) {
+    .side-panel.open {
+        width: 100%; /* Full width for mobile screens */
+    }
+}
+
         /* --- Overlay for background dim --- */
         .overlay {
             position: fixed;
@@ -902,46 +919,6 @@
 .custom-popup-buttons .btn {
     width: 45%;
     /* Add any other button styles */
-}
-/* --- RESPONSIVE DESIGN --- */
-
-/* Medium screens (tablet) */
-@media (min-width: 768px) and (max-width: 1023px) {
-    .side-panel {
-        width: 350px; /* Slightly narrower */
-    }
-    .panel-header {
-        font-size: 1.2rem;
-    }
-    .button-row button {
-        font-size: 0.95rem;
-        padding: 10px;
-    }
-}
-
-/* Small screens (mobile) */
-@media (max-width: 767px) {
-    .side-panel {
-        width: 100%; /* Full width on mobile */
-    }
-    .panel-header {
-        font-size: 1.1rem;
-        padding: 0.8rem 1rem;
-    }
-    .panel-content {
-        padding: 1rem;
-    }
-    .panel-content input,
-    .panel-content select {
-        font-size: 0.95rem;
-        padding: 10px;
-    }
-    .button-row {
-        flex-direction: column; /* Stack buttons */
-    }
-    .button-row button {
-        width: 100%;
-    }
 }
     
 </style>
@@ -1208,15 +1185,16 @@
             profileMobile.value = userData.mobileNumber || '';
         }
 
-        function openPanel(panel) {
-            panel.style.width = '350px';
-            overlay.classList.add('show');
-        }
+// --- Panel Management ---
+function openPanel() {
+    profilePanel.classList.add('open');
+    overlay.classList.add('show');
+}
 
-        function closeAllPanels() {
-            if(profilePanel) profilePanel.style.width = '0';
-            overlay.classList.remove('show');
-        }
+function closeAllPanels() {
+    profilePanel.classList.remove('open');
+    overlay.classList.remove('show');
+}
 
         if (profileIcon && profilePanel && closeProfileBtn && logoutBtn) {
             profileIcon.addEventListener('click', (e) => {
