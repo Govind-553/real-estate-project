@@ -16,32 +16,41 @@ const sellFlatSchema = new mongoose.Schema({
     },
     propertyType: {
         type: String,
-        required: true // Added this field
+        required: true
     },
     price: {
         type: Number,
         required: true
     },
     contact: {
-        type: Number,
+        type: String, // ✅ store as string for consistency
         required: [true, 'Mobile number is required.'],
         trim: true,
-        match: [/^[0-9]{10}$/, 'Please fill a valid 10-digit mobile number.']
+        match: [/^[0-9]{10}$/, 'Please fill a valid 10-digit mobile number.'],
+        unique: true // ✅ enforce uniqueness
     },
     date: {
         type: Date,
-        required: true // Added this field
+        required: true
     },
     ownershipType: {
         type: String,
-        required: true // Added this field
+        required: true
     },
     createdAt: {
         type: Date,
         default: Date.now
     },
-});
+}, { timestamps: true });
+
+// ✅ Ensure unique index for contact
+sellFlatSchema.index({ contact: 1 }, { unique: true });
 
 const SellFlat = mongoose.model('SellFlat', sellFlatSchema);
+
+// ✅ Ensure indexes build at startup
+SellFlat.init()
+    .then(() => console.log(""))
+    .catch(err => console.error("❌ Error ensuring SellFlat indexes:", err));
 
 export default SellFlat;

@@ -37,12 +37,18 @@ export const createSellListing = async (req, res) => {
         const savedListing = await newListing.save();
 
         res.status(201).json({
-            message: "New flat for sale is listed successfully.",
+            message: "✅ New flat for sale is listed successfully.",
             listing: savedListing,
         });
     } catch (error) {
         console.error("Error creating sell listing:", error.message);
-        res.status(500).json({ message: "Server error while creating sell listing." + error.message });
+
+        // ✅ Handle duplicate contact error
+        if (error.code === 11000 && error.keyPattern?.contact) {
+            return res.status(409).json({ message: "❌ This contact number is already used in another listing." });
+        }
+
+        res.status(500).json({ message: "Server error while creating sell listing. " + error.message });
     }
 };
 
