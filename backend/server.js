@@ -7,7 +7,7 @@ import userRoutes from "./routes/userRoutes.js";
 import rentRoutes from "./routes/rentRoutes.js";
 import sellRoutes from "./routes/sellRoutes.js";
 import cookieParser from "cookie-parser";
-import adminRoutes from "./routes/adminRoutes.js";
+//import adminRoutes from "./routes/adminRoutes.js";
 //import { firebaseconfig } from "./controllers/firebase.js";
 //import { verifyAccessToken } from "./middleware/userAuth.js";
 //import { checkAdminNumber } from "./middleware/checkAdminNumber.js";
