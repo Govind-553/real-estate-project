@@ -338,23 +338,28 @@ const userNameInput = propertyForm.elements['userName'];
     // API for User Fetching by Contact Number
     contactInput.addEventListener('blur', async () => {
     const contactVal = contactInput.value.trim();
-    if (contactVal.length === 10) { // only check if valid 10-digit
+    if (contactVal.length === 10) {
         try {
             const res = await fetch(`http://localhost:3000/api/users/findByContact/${contactVal}`);
-            if (res.ok) {
-                const data = await res.json();
+            const data = await res.json();
+
+            if (res.ok && data.fullName) {
                 userNameInput.value = data.fullName; // auto-fill name
-                showCustomPopup(`✅ User found: ${data.fullName}. Details auto-filled.`);
-            }
-            else if (!res.ok) {
-                userNameInput.value = ""; // clear if not found
+                showCustomPopup(`✅ Data is fetched successfully: ${data.message}`);
+            } else if (res.status === 403) {
+                userNameInput.value = ""; 
+                showCustomPopup("⚠️ " + data.message); // inactive user
+            } else {
+                userNameInput.value = "";
+                showCustomPopup("⚠️ " + data.message); // not found, allow manual typing
             }
         } catch (err) {
             console.error("Error checking user:", err);
-            showCustomPopup("❌ Error fetching user details." + err.message);
+            showCustomPopup("❌ Error fetching user details: " + err.message);
         }
     }
 });
+
 
     async function fetchAndRenderProperties() {
         try {

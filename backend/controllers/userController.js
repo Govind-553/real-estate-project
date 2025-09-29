@@ -1,4 +1,6 @@
 import User from '../models/User.js';
+import RentFlat from '../models/rentflats.js';
+import SellFlat from '../models/sellflats.js';
 import bcrypt from "bcrypt";
 import express from 'express';
 import jwt from "jsonwebtoken";
@@ -125,29 +127,63 @@ export const loginUser = async (req, res) => {
     }
 };
 
-// New Route - Get User by Contact 
+// Route - Get User by Contact 
 export const getUserByContact = async (req, res) => {
     try {
         let { contact } = req.params;
 
-        // If only 10 digits provided, add 91 prefix
+        // Normalize to +91XXXXXXXXXX
         if (/^[0-9]{10}$/.test(contact)) {
             contact = "91" + contact;
         }
 
+        // 1️⃣ Check in User collection
         const user = await User.findOne({ mobileNumber: contact });
-        if (!user) return res.status(404).json({ message: "No user found." });
+        if (user) {
+            if (user.subscriptionStatus === "Active") {
+                return res.json({
+                    message: "user",
+                    fullName: user.fullName,
+                    mobileNumber: user.mobileNumber.toString().slice(-10),
+                });
+            } else {
+                return res.status(403).json({ message: "User is not active." });
+            }
+        }
 
-        // Return name but strip 91 for frontend display
-        res.json({ 
-            fullName: user.fullName, 
-            mobileNumber: user.mobileNumber.toString().slice(-10) 
+        // 2️⃣ Check in RentFlat
+        const rentUserDetails = await RentFlat.findOne({ contact: contact });
+        if (rentUserDetails) {
+            return res.json({
+                message: "rent",
+                fullName: rentUserDetails.userName,
+                mobileNumber: rentUserDetails.contact.toString().slice(-10),
+            });
+        }
+
+        // 3️⃣ Check in SellFlat
+        const sellUserDetails = await SellFlat.findOne({ contact: contact });
+        if (sellUserDetails) {
+            return res.json({
+                message: "sell",
+                fullName: sellUserDetails.userName,
+                mobileNumber: sellUserDetails.contact.toString().slice(-10),
+            });
+        }
+
+        // 4️⃣ Not found anywhere → allow manual entry
+        return res.status(200).json({
+            message: "Data is not associated with this number, You can write the name manually",
+            fullName: null,
+            mobileNumber: contact.slice(-10),
         });
+
     } catch (err) {
         console.error("Error fetching user by contact:", err);
-        res.status(500).json({ message: "Server error." });
+        res.status(500).json({ message: "Server error: " + err.message });
     }
 };
+
 
 
 //Route 3 - Forgot Password
