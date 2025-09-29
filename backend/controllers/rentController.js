@@ -18,16 +18,16 @@ const cleanMobileNumber = (mobileString) => {
 export const createRentListing = async (req, res) => {
     const { contact, location, propertyType, price, name, date, tenantType } = req.body || {};
 
-    try {
+    try { 
         if (!contact || !location || !propertyType || !price || !name || !date || !tenantType) {
             return res.status(400).json({ message: "All required fields must be provided." });
         }
-
+        
         // Always normalize to 10 digits
-        const sanitizedContact = contact.replace(/^91/, "").trim();
+        const sanitizedContact = '91' + contact.trim();
 
         // Lookup user with prefixed 91
-        const matchedUser = await User.findOne({ mobileNumber: "91" + sanitizedContact });
+        const matchedUser = await User.findOne({ mobileNumber: sanitizedContact });
         let finalUserName = name;
 
         if (matchedUser) {

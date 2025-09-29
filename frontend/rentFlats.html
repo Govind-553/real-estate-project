@@ -387,6 +387,7 @@ const userNameInput = propertyForm.elements['userName'];
         }
         const accessToken = localStorage.getItem('token');
         if (!accessToken) { showCustomPopup('❌ Authentication failed. Please log in again.'); return; }
+
         const formData = {
             location: propertyForm.elements['location'].value,
             propertyType: propertyForm.elements['propertyType'].value,
