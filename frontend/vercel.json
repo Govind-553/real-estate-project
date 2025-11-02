@@ -1,7 +1,4 @@
 {
-  "projectSettings": {
-    "framework": null
-  },
   "builds": [
     { "src": "frontend/create-firebase-config.mjs", "use": "@vercel/node" }
   ],
