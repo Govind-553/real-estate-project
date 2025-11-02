@@ -449,7 +449,7 @@
                       localStorage.setItem("token", data.token);
                       localStorage.setItem("admin", JSON.stringify(data.data));
                       showCustomPopup("✅ Admin Logged-in successfully!", "Success", () => {
-                          window.location.href = "../frontend/admin-dashboard.html";
+                          window.location.href = "admin-dashboard.html";
                       });
                   } else {
                       showCustomPopup(data.message ||"⚠️ Invalid login credentials", "Error");
