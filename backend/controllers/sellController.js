@@ -34,6 +34,22 @@ export const createSellListing = async (req, res) => {
             finalUserName = matchedUser.fullName; // auto-fill user name
         }
 
+        // 🔹 ADD DUPLICATE CHECK HERE
+        const duplicateListing = await SellFlat.findOne({
+            contact: sanitizedContact,
+            location,
+            propertyType,
+            price: parsePrice(price),
+            ownershipType
+        });
+
+        if (duplicateListing) {
+            return res.status(409).json({
+                message: "A listing with the same details already exists. Please modify at least one attribute."
+            });
+        }
+        // 🔹 END DUPLICATE CHECK
+
         const newListing = new SellFlat({
             location,
             propertyType,

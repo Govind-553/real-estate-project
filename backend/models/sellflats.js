@@ -23,11 +23,11 @@ const sellFlatSchema = new mongoose.Schema({
         required: true
     },
     contact: {
-        type: String, // ✅ store as string for consistency
+        type: String, // store as string for consistency
         required: [true, 'Mobile number is required.'],
         trim: true,
         match: [/^[0-9]{10}$/, 'Please fill a valid 10-digit mobile number.'],
-        unique: true // ✅ enforce uniqueness
+        index: true //  index for faster lookups
     },
     date: {
         type: Date,

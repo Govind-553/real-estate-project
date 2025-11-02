@@ -330,21 +330,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let filters = { location: null, flatType: null, price: null, mobile: null }; 
 
-    // API for user name fetching by contact number
+   // API for User Fetching by Contact Number
     contactInput.addEventListener('blur', async () => {
     const contactVal = contactInput.value.trim();
     if (contactVal.length === 10) {
         try {
             const res = await fetch(`http://localhost:3000/api/users/findByContact/${contactVal}`);
-            if (res.ok) {
-                const data = await res.json();
-                userNameInput.value = data.fullName;
-                showCustomPopup(`✅ User found: ${data.fullName}. Auto-filled name.`);
+            const data = await res.json();
+
+            if (res.ok && data.fullName) {
+                userNameInput.value = data.fullName; // auto-fill name
+                showCustomPopup(`✅ Data is fetched successfully: ${data.message}`);
+            } else if (res.status === 403) {
+                userNameInput.value = ""; 
+                showCustomPopup("⚠️ " + data.message); // inactive user
+                closePanel();
             } else {
                 userNameInput.value = "";
+                showCustomPopup("⚠️ " + data.message); // not found, allow manual typing
             }
         } catch (err) {
             console.error("Error checking user:", err);
+            showCustomPopup("❌ Error fetching user details: " + err.message);
         }
     }
 });
@@ -406,16 +413,12 @@ document.addEventListener('DOMContentLoaded', function() {
     await fetchAndRenderProperties();
     closePanel();
 
-} catch (error) {
-    console.error("Error submitting form:", error);
-    // ✅ Popup for duplicate contact
-    if (error.message.includes("contact number is already used")) {
-        showCustomPopup("❌ This contact number is already used in another property for sale.");
-    } else {
+}  catch (error) {
+        console.error("Error submitting form:", error);
         showCustomPopup(`❌ An error occurred: ${error.message}`);
     }
-}
 });
+
 
     document.querySelector('.listings-section').addEventListener('click', async (e) => {
         const editBtn = e.target.closest('.edit-btn');
