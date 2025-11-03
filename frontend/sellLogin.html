@@ -810,7 +810,7 @@
                             localStorage.setItem("userToken", data.token);
                             localStorage.setItem("userMobileNumber", "+91" + mobileInput);
                             localStorage.setItem("user", JSON.stringify(data.data));
-                            window.location.href = "../frontend/sellProperties.html";
+                            window.location.href = "sellProperties.html";
                         } else if (response.status === 403) {
                             showCustomPopup(
                                 "❌ " + data.message,
