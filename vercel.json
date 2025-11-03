@@ -1,9 +1,4 @@
 {
-  "builds": [
-    { "src": "frontend/*.html", "use": "@vercel/static" },
-    { "src": "frontend/img/**", "use": "@vercel/static" },
-    { "src": "frontend/create-firebase-config.mjs", "use": "@vercel/node" }
-  ],
   "routes": [
     { "src": "/(.*)", "dest": "/frontend/$1" }
   ]
