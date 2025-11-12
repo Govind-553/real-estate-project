@@ -327,39 +327,36 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInputs = document.querySelectorAll('.search-input');
     const clearButtons = document.querySelectorAll('.clear-btn');
     const contactInput = propertyForm.elements['contact'];
-const userNameInput = propertyForm.elements['userName'];
+    const userNameInput = propertyForm.elements['userName'];
 
     let filters = { location: null, flatType: null, price: null, mobile: null };
 
-    // ==========================================================
-    // === FULLY RESTORED JAVASCRIPT LOGIC FOR UI AND FILTERS ===
-    // ==========================================================
-
+    // === JAVASCRIPT FOR UI AND FILTERS ===
     // API for User Fetching by Contact Number
     contactInput.addEventListener('blur', async () => {
-    const contactVal = contactInput.value.trim();
-    if (contactVal.length === 10) {
-        try {
-            const res = await fetch(`https://real-estate-project-1-lps5.onrender.com/api/users/findByContact/${contactVal}`);
-            const data = await res.json();
+        const contactVal = contactInput.value.trim();
+        if (contactVal.length === 10) {
+            try {
+                const res = await fetch(`https://real-estate-project-1-lps5.onrender.com/api/users/findByContact/${contactVal}`);
+                const data = await res.json();
 
-            if (res.ok && data.fullName) {
-                userNameInput.value = data.fullName; // auto-fill name
-                showCustomPopup(`✅ Data is fetched successfully: ${data.message}`);
-            } else if (res.status === 403) {
-                userNameInput.value = ""; 
-                showCustomPopup("⚠️ " + data.message); // inactive user
-                closePanel();
-            } else {
-                userNameInput.value = "";
-                showCustomPopup("⚠️ " + data.message); // not found, allow manual typing
+                if (res.ok && data.fullName) {
+                    userNameInput.value = data.fullName; 
+                    showCustomPopup(`✅ Data is fetched successfully: ${data.message}`);
+                } else if (res.status === 403) {
+                    userNameInput.value = ""; 
+                    showCustomPopup("⚠️ " + data.message); 
+                    closePanel();
+                } else {
+                    userNameInput.value = "";
+                    showCustomPopup("⚠️ " + data.message); 
+                }
+            } catch (err) {
+                console.error("Error checking user:", err);
+                showCustomPopup("❌ Error fetching user details: " + err.message);
             }
-        } catch (err) {
-            console.error("Error checking user:", err);
-            showCustomPopup("❌ Error fetching user details: " + err.message);
         }
-    }
-});
+    });
 
 
     async function fetchAndRenderProperties() {
@@ -402,37 +399,37 @@ const userNameInput = propertyForm.elements['userName'];
         const url = isCreating ? `${BASE_URL}/create` : `${BASE_URL}/update/${propertyId}`;
         const method = isCreating ? 'POST' : 'PUT';
          try {
-        const response = await fetch(url, { 
-            method, 
-            headers: { 
-                'Content-Type': 'application/json', 
-                'authorization': `Bearer ${accessToken}` 
-            }, 
-            body: JSON.stringify(formData) 
-        });
+            const response = await fetch(url, { 
+                method, 
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'authorization': `Bearer ${accessToken}` 
+                }, 
+                body: JSON.stringify(formData) 
+            });
 
-        // ✅ MODIFIED: Handle the 409 status code
-        if (!response.ok) { 
-            const errorData = await response.json().catch(() => ({ message: 'Failed to save data.' })); 
-            
-            // Check for the 409 Conflict status code and display its message
-            if (response.status === 409) {
-                showCustomPopup(`❌ ${errorData.message}`);
-                return;
+            // ✅ MODIFIED: Handle the 409 status code
+            if (!response.ok) { 
+                const errorData = await response.json().catch(() => ({ message: 'Failed to save data.' })); 
+                
+                // Check for the 409 Conflict status code and display its message
+                if (response.status === 409) {
+                    showCustomPopup(`❌ ${errorData.message}`);
+                    return;
+                }
+
+                throw new Error(errorData.message); 
             }
-
-            throw new Error(errorData.message); 
+            
+            showCustomPopup(isCreating ? '✅ New rental property added!' : '✅ Rental property updated!');
+            await fetchAndRenderProperties();
+            closePanel();
+            
+        } catch (error) {
+            console.error("Error submitting form:", error);
+            showCustomPopup(`❌ An error occurred: ${error.message}`);
         }
-        
-        showCustomPopup(isCreating ? '✅ New rental property added!' : '✅ Rental property updated!');
-        await fetchAndRenderProperties();
-        closePanel();
-        
-    } catch (error) {
-        console.error("Error submitting form:", error);
-        showCustomPopup(`❌ An error occurred: ${error.message}`);
-    }
-});
+    });
 
     document.querySelector('.listings-section').addEventListener('click', async (e) => {
         const editBtn = e.target.closest('.edit-btn');
@@ -486,7 +483,7 @@ const userNameInput = propertyForm.elements['userName'];
 
                 // Check if both are valid numbers and if the property's price is greater than the filter
                 if (!isNaN(filterPrice) && !isNaN(propertyPrice) && propertyPrice > filterPrice) {
-                    return false; // Exclude if property price is higher than the entered value
+                    return false; 
                 }
             }
             // --- END OF MODIFICATION ---
@@ -494,19 +491,29 @@ const userNameInput = propertyForm.elements['userName'];
             // Mobile number filter (unchanged)
             if (filters.mobile && filters.mobile.value && !p.contact.includes(filters.mobile.value)) return false;
             
-            return true; // Include the property if it passes all filters
+            return true;
         });
     }
     
+    // --- rotation logic uses width + orientation (portrait => cards on mobile) ---
     function filterAndRender() {
         const filteredData = getFilteredData();
-        const isMobileView = window.innerWidth < 769;
-        tableView.style.display = isMobileView ? 'none' : 'block';
-        cardView.style.display = isMobileView ? 'flex' : 'none';
-        if (isMobileView) renderCards(filteredData); else renderTable(filteredData);
+
+        // Use both width and orientation:
+        const isMobile = window.innerWidth < 769;
+        const isPortrait = window.matchMedia("(orientation: portrait)").matches;
+
+        // Show cards only on mobile + portrait. Table otherwise (desktop or landscape).
+        const showCards = isMobile && isPortrait;
+
+        tableView.style.display = showCards ? 'none' : 'block';
+        cardView.style.display = showCards ? 'flex' : 'none';
+
+        if (showCards) renderCards(filteredData); else renderTable(filteredData);
         updateCounters(filteredData);
     }
-    
+    // --- end updated rotation logic ---
+
     function renderTable(data) {
         propertiesBody.innerHTML = '';
         data.forEach(prop => {
@@ -538,6 +545,7 @@ const userNameInput = propertyForm.elements['userName'];
     overlay.addEventListener('click', closePanel);
     hamburger.addEventListener('click', () => navLinks.classList.toggle('active'));
     window.addEventListener('resize', filterAndRender);
+    window.matchMedia("(orientation: portrait)").addEventListener('change', filterAndRender);
     
     dropdowns.forEach(dropdown => {
         const btn = dropdown.querySelector('.dropdown-btn');
@@ -590,6 +598,7 @@ const userNameInput = propertyForm.elements['userName'];
     fetchAndRenderProperties();
 });
 </script>
+
 
 </body>
 </html>

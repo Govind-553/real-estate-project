@@ -339,15 +339,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await res.json();
 
             if (res.ok && data.fullName) {
-                userNameInput.value = data.fullName; // auto-fill name
+                userNameInput.value = data.fullName; 
                 showCustomPopup(`✅ Data is fetched successfully: ${data.message}`);
             } else if (res.status === 403) {
                 userNameInput.value = ""; 
-                showCustomPopup("⚠️ " + data.message); // inactive user
+                showCustomPopup("⚠️ " + data.message); 
                 closePanel();
             } else {
                 userNameInput.value = "";
-                showCustomPopup("⚠️ " + data.message); // not found, allow manual typing
+                showCustomPopup("⚠️ " + data.message); 
             }
         } catch (err) {
             console.error("Error checking user:", err);
@@ -472,15 +472,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // rotation logic uses width + orientation (portrait => cards on mobile) ---
     function filterAndRender() {
         const filteredData = getFilteredData();
-        const isMobileView = window.innerWidth < 769;
-        tableView.style.display = isMobileView ? 'none' : 'block';
-        cardView.style.display = isMobileView ? 'flex' : 'none';
-        if (isMobileView) renderCards(filteredData); else renderTable(filteredData);
+
+        // Use both width and orientation:
+        const isMobile = window.innerWidth < 769;
+        const isPortrait = window.matchMedia("(orientation: portrait)").matches;
+
+        // Show cards only on mobile + portrait. Table otherwise (desktop or landscape).
+        const showCards = isMobile && isPortrait;
+
+        tableView.style.display = showCards ? 'none' : 'block';
+        cardView.style.display = showCards ? 'flex' : 'none';
+
+        if (showCards) renderCards(filteredData); else renderTable(filteredData);
         updateCounters(filteredData);
     }
-    
+    // --- end updated rotation logic ---
+
     function renderTable(data) {
         propertiesBody.innerHTML = '';
         data.forEach(prop => {
@@ -519,7 +529,8 @@ document.addEventListener('DOMContentLoaded', function() {
     overlay.addEventListener('click', closePanel);
     hamburger.addEventListener('click', () => navLinks.classList.toggle('active'));
     window.addEventListener('resize', filterAndRender);
-    
+    window.matchMedia("(orientation: portrait)").addEventListener('change', filterAndRender);
+
     dropdowns.forEach(dropdown => {
         const btn = dropdown.querySelector('.dropdown-btn');
         const options = dropdown.querySelectorAll('.dropdown-option');
